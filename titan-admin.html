@@ -1,0 +1,3263 @@
+<!--
+  TITAN GYM Management System — Admin Portal
+  Version: 3.0 (Split Portal)
+  Built by: AI Website Builder Agents (Antigravity)
+-->
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>TITAN GYM — لوحة إدارة الجيم</title>
+  
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;700&family=Orbitron:wght@700;900&display=swap" rel="stylesheet">
+  
+  <!-- Lucide Icons CDN -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+  
+  <!-- Supabase JS Client CDN -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  
+  <style>
+    /* 🎨 DESIGN SYSTEM & NEON FUTURISTIC STYLES */
+    :root {
+      --bg: #0a0a0f;
+      --surface: #111118;
+      --surface2: #1a1a28;
+      --surface3: #22223a;
+      --primary: #00f5ff; /* electric cyan */
+      --secondary: #7b2fff; /* neon purple */
+      --danger: #ff2d55; /* neon red */
+      --success: #00ff88; /* neon green */
+      --warning: #ffcc00; /* neon yellow */
+      --orange: #ff6b2f; /* neon orange */
+      --text: #ffffff;
+      --text-muted: #8888aa;
+      --border: rgba(255,255,255,0.07);
+      
+      --font-display: 'Orbitron', sans-serif;
+      --font-arabic: 'Cairo', sans-serif;
+      --font-english: 'Inter', sans-serif;
+      --font-data: 'JetBrains Mono', monospace;
+      --transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      scrollbar-width: thin;
+      scrollbar-color: var(--border) transparent;
+    }
+
+    body {
+      background-color: var(--bg);
+      color: var(--text);
+      font-family: var(--font-arabic);
+      min-height: 100vh;
+      overflow-x: hidden;
+      line-height: 1.5;
+    }
+
+    /* RTL/LTR Toggles */
+    html[dir="ltr"] body {
+      font-family: var(--font-english);
+    }
+
+    a, button {
+      cursor: pointer;
+      text-decoration: none;
+      color: inherit;
+      font-family: inherit;
+    }
+
+    /* 🧱 GLASSMORPHISM & NEON GLOWS */
+    .glass-card {
+      background: rgba(255, 255, 255, 0.03);
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 20px;
+      box-shadow: 0 4px 30px rgba(0, 0, 0, 0.4);
+      transition: var(--transition);
+    }
+    .glass-card:hover {
+      box-shadow: 0 0 20px rgba(0, 245, 255, 0.1);
+      border-color: rgba(255, 255, 255, 0.15);
+    }
+    .neon-border-primary { border-color: rgba(0, 245, 255, 0.3); }
+    .neon-border-secondary { border-color: rgba(123, 47, 255, 0.3); }
+
+    /* 🔘 BUTTONS & BADGES */
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      padding: 10px 20px;
+      font-weight: 600;
+      font-size: 0.9rem;
+      border-radius: 8px;
+      border: 1px solid transparent;
+      transition: var(--transition);
+      background: transparent;
+      color: var(--text);
+    }
+    .btn-primary {
+      background: linear-gradient(135deg, var(--primary), var(--secondary));
+      border: none;
+      box-shadow: 0 0 15px rgba(0, 245, 255, 0.25);
+    }
+    .btn-primary:hover:not(:disabled) {
+      transform: translateY(-2px);
+      box-shadow: 0 0 25px rgba(0, 245, 255, 0.4);
+    }
+    .btn-ghost {
+      border: 1px solid var(--border);
+      background: rgba(255, 255, 255, 0.02);
+    }
+    .btn-ghost:hover:not(:disabled) {
+      background: var(--surface2);
+      border-color: var(--primary);
+    }
+    .btn-danger {
+      background: var(--danger);
+      box-shadow: 0 0 15px rgba(255, 45, 85, 0.25);
+    }
+    .btn-danger:hover:not(:disabled) {
+      transform: translateY(-2px);
+      box-shadow: 0 0 25px rgba(255, 45, 85, 0.4);
+    }
+    .btn:disabled {
+      opacity: 0.4;
+      cursor: not-allowed;
+    }
+
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      padding: 4px 10px;
+      border-radius: 20px;
+      font-size: 0.75rem;
+      font-weight: 700;
+      border: 1px solid transparent;
+    }
+    .badge-success { background: rgba(0, 255, 136, 0.1); color: var(--success); border-color: rgba(0, 255, 136, 0.2); }
+    .badge-warning { background: rgba(255, 204, 0, 0.1); color: var(--warning); border-color: rgba(255, 204, 0, 0.2); }
+    .badge-danger { background: rgba(255, 45, 85, 0.1); color: var(--danger); border-color: rgba(255, 45, 85, 0.2); }
+    
+    .status-pulse {
+      animation: breathe 3s infinite alternate;
+    }
+    @keyframes breathe {
+      0% { box-shadow: 0 0 4px rgba(0, 255, 136, 0.1); }
+      100% { box-shadow: 0 0 12px rgba(0, 255, 136, 0.35); }
+    }
+
+    /* 📳 TOAST MESSAGES */
+    .toast-container {
+      position: fixed;
+      bottom: 24px;
+      left: 24px;
+      z-index: 1000;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      max-width: 360px;
+      width: 100%;
+    }
+    html[dir="ltr"] .toast-container {
+      left: auto;
+      right: 24px;
+    }
+    .toast {
+      background: rgba(17, 17, 24, 0.95);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 14px 18px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+      animation: slideIn 0.3s forwards;
+      border-right: 4px solid var(--primary);
+    }
+    html[dir="ltr"] .toast {
+      border-right: none;
+      border-left: 4px solid var(--primary);
+    }
+    .toast.success { border-color: var(--success); }
+    .toast.danger { border-color: var(--danger); }
+    .toast.warning { border-color: var(--warning); }
+    @keyframes slideIn {
+      from { transform: translateY(30px); opacity: 0; }
+      to { transform: translateY(0); opacity: 1; }
+    }
+
+    /* 🧭 MAIN VIEWS HOUSING */
+    .view-container {
+      display: none;
+      min-height: 100vh;
+    }
+    .view-container.active {
+      display: flex;
+      animation: fadeSlide 0.35s ease-out;
+    }
+    @keyframes fadeSlide {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* 🔐 LOGIN PANEL & SCANLINE */
+    #login-view {
+      align-items: center;
+      justify-content: center;
+      background: linear-gradient(135deg, #050508, #0a0a16);
+      position: relative;
+    }
+    .scanline {
+      position: absolute;
+      top: 0; left: 0; width: 100%; height: 6px;
+      background: linear-gradient(to right, transparent, var(--primary), var(--secondary), var(--primary), transparent);
+      box-shadow: 0 0 15px var(--primary);
+      animation: scan 5s linear infinite;
+      pointer-events: none;
+      opacity: 0.6;
+    }
+    @keyframes scan {
+      0% { top: 0%; }
+      50% { top: 100%; }
+      100% { top: 0%; }
+    }
+    .login-box {
+      width: 90%;
+      max-width: 420px;
+      padding: 35px 25px;
+      text-align: center;
+    }
+    .login-tabs {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+      margin-bottom: 25px;
+    }
+    .login-tab-btn {
+      padding: 10px;
+      border-bottom: 2px solid transparent;
+      color: var(--text-muted);
+      font-weight: 700;
+      text-align: center;
+      display: block;
+    }
+    .login-tab-btn.active {
+      color: var(--primary);
+      border-color: var(--primary);
+      text-shadow: 0 0 10px rgba(0, 245, 255, 0.3);
+    }
+
+    /* 👑 ADMIN INTERFACE LAYOUT */
+    .admin-sidebar {
+      width: 260px;
+      background: rgba(12, 12, 20, 0.95);
+      border-left: 1px solid var(--border);
+      position: fixed;
+      top: 0; bottom: 0; right: 0;
+      z-index: 100;
+      display: flex;
+      flex-direction: column;
+      transition: var(--transition);
+    }
+    html[dir="ltr"] .admin-sidebar {
+      right: auto; left: 0;
+      border-left: none; border-right: 1px solid var(--border);
+    }
+    .admin-main {
+      flex: 1;
+      margin-right: 260px;
+      padding: 30px;
+      min-height: 100vh;
+      overflow-y: auto;
+      transition: var(--transition);
+    }
+    html[dir="ltr"] .admin-main {
+      margin-right: 0; margin-left: 260px;
+    }
+    .sidebar-brand {
+      padding: 24px 20px;
+      font-family: var(--font-display);
+      font-size: 1.5rem;
+      font-weight: 900;
+      border-bottom: 1px solid var(--border);
+      letter-spacing: 1.5px;
+    }
+    .sidebar-menu {
+      list-style: none;
+      padding: 20px 10px;
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+    .sidebar-link {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 12px 16px;
+      color: var(--text-muted);
+      border-radius: 8px;
+      font-weight: 600;
+      transition: var(--transition);
+      position: relative;
+    }
+    .sidebar-link:hover, .sidebar-link.active {
+      color: var(--primary);
+      background: rgba(0, 245, 255, 0.03);
+    }
+    .sidebar-link.active::before {
+      content: "";
+      position: absolute;
+      top: 0; bottom: 0; right: 0; width: 3px;
+      background: var(--primary);
+      box-shadow: 0 0 10px var(--primary);
+    }
+    html[dir="ltr"] .sidebar-link.active::before {
+      right: auto; left: 0;
+    }
+    
+    /* Mobile Header & Hamb menu */
+    .admin-mob-header {
+      display: none;
+      background: var(--surface);
+      border-bottom: 1px solid var(--border);
+      padding: 16px 20px;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    /* 👥 DATA TABLES */
+    .table-container {
+      overflow-x: auto;
+      border-radius: 8px;
+      border: 1px solid var(--border);
+      margin-top: 15px;
+    }
+    .data-table {
+      width: 100%;
+      border-collapse: collapse;
+      text-align: right;
+    }
+    html[dir="ltr"] .data-table {
+      text-align: left;
+    }
+    .data-table th, .data-table td {
+      padding: 14px 18px;
+      border-bottom: 1px solid var(--border);
+    }
+    .data-table th {
+      background: rgba(255,255,255,0.01);
+      font-weight: 700;
+      color: var(--text-muted);
+      font-size: 0.85rem;
+    }
+    .data-table tr:hover {
+      background: rgba(255,255,255,0.01);
+    }
+
+    /* Forms */
+    .form-group {
+      margin-bottom: 15px;
+      text-align: right;
+    }
+    html[dir="ltr"] .form-group {
+      text-align: left;
+    }
+    .form-label {
+      display: block;
+      margin-bottom: 6px;
+      font-size: 0.85rem;
+      color: var(--text-muted);
+      font-weight: 600;
+    }
+    .form-input, .form-select, .form-textarea {
+      width: 100%;
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 10px 14px;
+      color: var(--text);
+      font-family: inherit;
+      transition: var(--transition);
+    }
+    .form-input:focus, .form-select:focus, .form-textarea:focus {
+      outline: none;
+      border-color: var(--primary);
+      box-shadow: 0 0 10px rgba(0, 245, 255, 0.15);
+    }
+
+    /* 📊 PURE CSS CHARTS */
+    .stats-summary {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 20px;
+      margin-bottom: 25px;
+    }
+    .summary-card {
+      position: relative;
+      overflow: hidden;
+    }
+    .summary-card::after {
+      content: "";
+      position: absolute;
+      top: 0; right: 0; width: 4px; height: 100%;
+      background: var(--primary);
+    }
+    html[dir="ltr"] .summary-card::after {
+      right: auto; left: 0;
+    }
+    .summary-card.danger::after { background: var(--danger); }
+    .summary-card.success::after { background: var(--success); }
+    .summary-card.warning::after { background: var(--warning); }
+    .summary-card.secondary::after { background: var(--secondary); }
+
+    .chart-box {
+      min-height: 250px;
+      display: flex;
+      align-items: flex-end;
+      gap: 20px;
+      padding: 20px 10px;
+      border-bottom: 2px solid var(--border);
+      margin-top: 15px;
+    }
+    .chart-bar-wrapper {
+      flex: 1;
+      height: 100%;
+      display: flex;
+      flex-direction: column;
+      justify-content: flex-end;
+      align-items: center;
+      gap: 8px;
+    }
+    .chart-bar-fill {
+      width: 100%;
+      max-width: 45px;
+      background: linear-gradient(to top, var(--secondary), var(--primary));
+      border-radius: 6px 6px 0 0;
+      position: relative;
+      box-shadow: 0 0 10px rgba(0, 245, 255, 0.25);
+      animation: scaleUp 0.8s ease-out forwards;
+    }
+    @keyframes scaleUp {
+      from { height: 0; }
+    }
+    .chart-bar-val {
+      position: absolute;
+      top: -24px;
+      left: 50%;
+      transform: translateX(-50%);
+      font-size: 0.75rem;
+      font-family: var(--font-data);
+    }
+    .chart-bar-label {
+      font-size: 0.8rem;
+      color: var(--text-muted);
+    }
+
+    /* CSS Donut Pie Chart */
+    .donut-chart {
+      width: 180px;
+      height: 180px;
+      border-radius: 50%;
+      background: conic-gradient(var(--primary) 0% 33%, var(--secondary) 33% 66%, var(--warning) 66% 100%);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 15px auto;
+      position: relative;
+    }
+    .donut-chart::before {
+      content: "";
+      width: 110px;
+      height: 110px;
+      border-radius: 50%;
+      background: var(--surface);
+      position: absolute;
+    }
+    .donut-center-text {
+      position: relative;
+      z-index: 5;
+      text-align: center;
+    }
+
+    /* CSS Horizontal Chart */
+    .horiz-chart {
+      display: flex;
+      flex-direction: column;
+      gap: 15px;
+      margin-top: 20px;
+    }
+    .horiz-bar-row {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+    .horiz-bar-track {
+      width: 100%;
+      height: 20px;
+      background: rgba(255,255,255,0.03);
+      border-radius: 10px;
+      overflow: hidden;
+    }
+    .horiz-bar-fill {
+      height: 100%;
+      background: var(--primary);
+      box-shadow: 0 0 10px rgba(0, 245, 255, 0.2);
+      border-radius: 10px;
+    }
+
+    /* 🏢 MODAL STYLES */
+    .modal-overlay {
+      position: fixed;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: rgba(5, 5, 8, 0.85);
+      backdrop-filter: blur(5px);
+      z-index: 1000;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 16px;
+    }
+    .modal-overlay.active {
+      display: flex;
+    }
+    .modal-content {
+      width: 100%;
+      max-width: 520px;
+      max-height: 90vh;
+      overflow-y: auto;
+      animation: modalZoom 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
+    }
+    @keyframes modalZoom {
+      from { transform: scale(0.9); opacity: 0; }
+      to { transform: scale(1); opacity: 1; }
+    }
+    .modal-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 20px;
+      border-bottom: 1px solid var(--border);
+      padding-bottom: 12px;
+    }
+    .modal-close-btn {
+      background: transparent;
+      border: none;
+      color: var(--text-muted);
+    }
+    .modal-close-btn:hover { color: var(--danger); }
+
+    .grid-2 {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 15px;
+    }
+    @media (max-width: 600px) {
+      .grid-2 { grid-template-columns: 1fr; }
+    }
+
+    .photo-preview-circle {
+      width: 80px; height: 80px;
+      border-radius: 50%;
+      border: 2px solid var(--primary);
+      background-size: cover;
+      background-position: center;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%238888aa' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2'/%3E%3Ccircle cx='12' cy='7' r='4'/%3E%3C/svg%3E");
+    }
+
+    /* 🖨️ CARD PRINT CONFIGURATION */
+    .hidden-print-card {
+      display: none;
+    }
+    
+    @media print {
+      body * {
+        visibility: hidden;
+      }
+      .hidden-print-card, .hidden-print-card * {
+        visibility: visible;
+      }
+      .hidden-print-card {
+        display: block !important;
+        position: absolute;
+        left: 50%;
+        top: 50%;
+        transform: translate(-50%, -50%);
+        width: 3.375in;
+        height: 2.125in;
+        border: 2px solid #000;
+        background: #fff;
+        color: #000;
+        padding: 10px;
+        box-sizing: border-box;
+        font-family: 'Cairo', sans-serif;
+        border-radius: 6px;
+      }
+      .print-card-grid {
+        display: grid;
+        grid-template-columns: 60px 1fr;
+        gap: 8px;
+        height: 100%;
+        align-items: center;
+      }
+      .print-photo {
+        width: 55px;
+        height: 55px;
+        border-radius: 4px;
+        border: 1px solid #000;
+        background-size: cover;
+        background-position: center;
+      }
+      .print-info {
+        font-size: 8pt;
+        line-height: 1.2;
+      }
+      .print-title {
+        font-size: 10pt;
+        font-weight: 800;
+        border-bottom: 1px solid #000;
+        padding-bottom: 2px;
+        margin-bottom: 4px;
+        text-align: center;
+      }
+    }
+
+    /* Responsive */
+    @media (max-width: 768px) {
+      .admin-sidebar {
+        transform: translateX(260px);
+      }
+      html[dir="ltr"] .admin-sidebar {
+        transform: translateX(-260px);
+      }
+      .admin-sidebar.active {
+        transform: translateX(0);
+      }
+      .admin-main {
+        margin-right: 0 !important;
+        margin-left: 0 !important;
+      }
+      .admin-mob-header {
+        display: flex;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Language Switcher & General Top Bar -->
+  <div style="position: absolute; top: 15px; left: 15px; z-index: 1000;" id="global-lang-bar">
+    <button class="btn btn-ghost" onclick="toggleLanguage()" style="padding: 6px 12px; border-radius: 20px; font-size: 0.8rem;">
+      <i data-lucide="globe" style="width: 14px; height: 14px;"></i>
+      <span id="lang-toggle-label">EN</span>
+    </button>
+  </div>
+
+  <!-- Hidden Print-only Card Div -->
+  <div class="hidden-print-card" id="print-card-div"></div>
+
+  <!-- Toast Container -->
+  <div class="toast-container" id="toast-container"></div>
+
+  <!-- Modal Overlay -->
+  <div class="modal-overlay" id="modal-overlay" onclick="closeModalOutside(event)">
+    <div class="modal-content glass-card neon-border-primary" onclick="event.stopPropagation()">
+      <div class="modal-header">
+        <h3 id="modal-title">العنوان</h3>
+        <button class="modal-close-btn" onclick="hideModal()">
+          <i data-lucide="x"></i>
+        </button>
+      </div>
+      <div id="modal-body"></div>
+    </div>
+  </div>
+
+  <!-- ==========================================
+       🔒 VIEW 1: ADMIN LOGIN PORTAL
+       ========================================== -->
+  <main class="view-container active" id="login-view">
+    <div class="scanline"></div>
+    <div class="login-box glass-card neon-border-primary">
+      <h1 style="font-family: var(--font-display); font-size: 2.2rem; font-weight: 900; color: #fff; margin-bottom: 5px;">TITAN GYM</h1>
+      <p style="color: var(--primary); font-family: var(--font-display); font-size: 0.8rem; letter-spacing: 2px; margin-bottom: 25px;" id="login-sub-title">ADMIN CONTROL CENTER</p>
+      
+      <div class="login-tabs">
+        <a href="titan-member.html" class="login-tab-btn" id="tab-member-btn">دخول اللاعبين</a>
+        <span class="login-tab-btn active" id="tab-admin-btn">إدارة الجيم</span>
+      </div>
+
+      <!-- Admin Login Form (Password only) -->
+      <form id="admin-login-form" onsubmit="executeAdminLogin(event)">
+        <div class="form-group">
+          <label class="form-label" id="lbl-password-login">كلمة مرور النظام</label>
+          <input type="password" class="form-input" id="login-password" placeholder="••••••••" required style="text-align: center;">
+        </div>
+        <button type="submit" class="btn btn-primary" style="width: 100%; margin-top: 10px;">
+          <i data-lucide="shield-check"></i>
+          <span id="btn-login-admin">دخول المشرف</span>
+        </button>
+      </form>
+    </div>
+  </main>
+
+  <!-- ==========================================
+       👑 VIEW 2: ADMIN INTERFACE
+       ========================================== -->
+  <div class="view-container" id="admin-view">
+    <!-- Mobile Header -->
+    <header class="admin-mob-header" style="width: 100%;">
+      <h2 style="font-family: var(--font-display); font-size: 1.2rem;">TITAN <span style="color: var(--primary);">GYM</span></h2>
+      <button class="btn btn-ghost" onclick="toggleSidebarMenu()" style="padding: 6px 10px;">
+        <i data-lucide="menu" id="hamburger-icon"></i>
+      </button>
+    </header>
+
+    <!-- Admin Navigation Sidebar -->
+    <aside class="admin-sidebar" id="admin-sidebar">
+      <div class="sidebar-brand">
+        TITAN <span style="color: var(--primary);">GYM</span>
+      </div>
+      <ul class="sidebar-menu">
+        <li>
+          <a href="#admin/dashboard" class="sidebar-link active" onclick="switchAdminSection('admin-dashboard')" id="nav-dash">
+            <i data-lucide="layout-dashboard"></i> <span>لوحة التحكم</span>
+          </a>
+        </li>
+        <li>
+          <a href="#admin/members" class="sidebar-link" onclick="switchAdminSection('admin-members')" id="nav-members">
+            <i data-lucide="users"></i> <span>سجل الأعضاء</span>
+          </a>
+        </li>
+        <li class="owner-only">
+          <a href="#admin/products" class="sidebar-link" onclick="switchAdminSection('admin-products')" id="nav-products">
+            <i data-lucide="pill"></i> <span>المنتجات والمكملات</span>
+          </a>
+        </li>
+        <li>
+          <a href="#admin/workouts" class="sidebar-link" onclick="switchAdminSection('admin-workouts')" id="nav-workouts">
+            <i data-lucide="dumbbell"></i> <span>التمارين</span>
+          </a>
+        </li>
+        <li class="owner-only">
+          <a href="#admin/stats" class="sidebar-link" onclick="switchAdminSection('admin-stats')" id="nav-stats">
+            <i data-lucide="bar-chart-3"></i> <span>الإحصائيات</span>
+          </a>
+        </li>
+        <li>
+          <a href="#admin/notifications" class="sidebar-link" onclick="switchAdminSection('admin-notifications')" id="nav-notifications">
+            <i data-lucide="bell"></i> <span>الإشعارات</span>
+          </a>
+        </li>
+        <li class="owner-only">
+          <a href="#admin/settings" class="sidebar-link" onclick="switchAdminSection('admin-settings')" id="nav-settings">
+            <i data-lucide="settings"></i> <span>الإعدادات</span>
+          </a>
+        </li>
+      </ul>
+      <div style="padding: 20px; border-top: 1px solid var(--border);">
+        <button class="btn btn-ghost" style="width: 100%;" onclick="executeLogout()">
+          <i data-lucide="log-out"></i>
+          <span id="btn-logout-admin">خروج</span>
+        </button>
+      </div>
+    </aside>
+
+    <!-- Admin Workspace Content -->
+    <main class="admin-main">
+      
+      <!-- Section A: 🏠 Dashboard Overview -->
+      <section class="admin-section active" id="admin-dashboard">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px;">
+          <h2 id="title-dash-ov">لوحة التحكم العامة</h2>
+          <button class="btn btn-primary" onclick="triggerAddMemberModal()">
+            <i data-lucide="plus"></i> <span id="btn-add-member-dash">إضافة مشترك</span>
+          </button>
+        </div>
+        
+        <!-- Quick stats cards -->
+        <div class="stats-summary">
+          <div class="glass-card summary-card">
+            <div style="font-size: 0.8rem; color: var(--text-muted);" id="stat-total-label">إجمالي الأعضاء</div>
+            <div style="font-size: 1.8rem; font-weight: 800; font-family: var(--font-data);" id="dash-total-members">0</div>
+          </div>
+          <div class="glass-card summary-card success">
+            <div style="font-size: 0.8rem; color: var(--text-muted);" id="stat-active-label">نشط الآن</div>
+            <div style="font-size: 1.8rem; font-weight: 800; font-family: var(--font-data); color: var(--success);" id="dash-active-members">0</div>
+          </div>
+          <div class="glass-card summary-card warning">
+            <div style="font-size: 0.8rem; color: var(--text-muted);" id="stat-expiring-label">ينتهي قريباً (≤7 أيام)</div>
+            <div style="font-size: 1.8rem; font-weight: 800; font-family: var(--font-data); color: var(--warning);" id="dash-expiring-members">0</div>
+          </div>
+          <div class="glass-card summary-card danger">
+            <div style="font-size: 0.8rem; color: var(--text-muted);" id="stat-expired-label">منتهي الاشتراك</div>
+            <div style="font-size: 1.8rem; font-weight: 800; font-family: var(--font-data); color: var(--danger);" id="dash-expired-members">0</div>
+          </div>
+          <div class="glass-card summary-card danger">
+            <div style="font-size: 0.8rem; color: var(--text-muted);" id="stat-unpaid-label">غير واصلين / لم يدفعوا</div>
+            <div style="font-size: 1.8rem; font-weight: 800; font-family: var(--font-data); color: var(--danger);" id="dash-unpaid-members">0</div>
+          </div>
+        </div>
+
+        <div class="grid-2">
+          <!-- WhatsApp alerts panel -->
+          <div class="glass-card">
+            <h3 style="margin-bottom: 15px;" id="title-alerts-panel">تنبيهات المتابعة وتجديد الاشتراكات</h3>
+            <div style="display: flex; flex-direction: column; gap: 10px; max-height: 300px; overflow-y: auto;" id="dashboard-alerts-list"></div>
+          </div>
+          
+          <!-- Low Stock products panel -->
+          <div class="glass-card">
+            <h3 style="margin-bottom: 15px;" id="title-stock-alerts">تنبيهات مخزون المنتجات المنخفض</h3>
+            <div style="display: flex; flex-direction: column; gap: 10px; max-height: 300px; overflow-y: auto;" id="dashboard-stock-alerts"></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Section B: 👥 Members Registry -->
+      <section class="admin-section" style="display: none;" id="admin-members">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; flex-wrap: wrap; gap: 10px;">
+          <h2 id="title-members-registry">سجل الأعضاء والرياضيين</h2>
+          <div style="display: flex; gap: 10px;">
+            <input type="text" class="form-input" style="max-width: 200px;" placeholder="بحث باسم العضو..." id="member-search-input" oninput="renderRegistryTable()">
+            <button class="btn btn-primary" onclick="triggerAddMemberModal()">
+              <i data-lucide="plus"></i> <span id="btn-add-member-registry">إضافة عضو</span>
+            </button>
+          </div>
+        </div>
+
+        <div style="display: flex; gap: 8px; flex-wrap: wrap;" id="members-filter-tabs">
+          <button class="category-btn btn btn-ghost active" onclick="filterMembersList('all', this)" id="tab-all-mem">الكل</button>
+          <button class="category-btn btn btn-ghost" onclick="filterMembersList('active', this)" id="tab-active-mem">نشط</button>
+          <button class="category-btn btn btn-ghost" onclick="filterMembersList('expiring', this)" id="tab-expiring-mem">قارب الانتهاء</button>
+          <button class="category-btn btn btn-ghost" onclick="filterMembersList('expired', this)" id="tab-expired-mem">منتهي</button>
+          <button class="category-btn btn btn-ghost" onclick="filterMembersList('unpaid', this)" id="tab-unpaid-mem">غير واصل</button>
+        </div>
+
+        <div class="table-container">
+          <table class="data-table" id="registry-table">
+            <thead>
+              <tr>
+                <th id="th-photo">الصورة</th>
+                <th id="th-name">الاسم</th>
+                <th id="th-phone">الهاتف</th>
+                <th id="th-plan">الخطة</th>
+                <th id="th-payment">الدفع</th>
+                <th id="th-sub">الاشتراك</th>
+                <th id="th-expiry">الانتهاء</th>
+                <th id="th-days">الأيام</th>
+                <th id="th-trainer">المدرب</th>
+                <th id="th-actions">إجراءات</th>
+              </tr>
+            </thead>
+            <tbody id="registry-table-body"></tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- Section C: 💊 Products Inventory -->
+      <section class="admin-section" style="display: none;" id="admin-products">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+          <h2 id="title-inventory">المنتجات والمكملات الغذائية</h2>
+          <button class="btn btn-primary" onclick="triggerAddProductModal()">
+            <i data-lucide="plus"></i> <span id="btn-add-product">إضافة منتج</span>
+          </button>
+        </div>
+
+        <div style="display: flex; gap: 10px; overflow-x: auto; padding-bottom: 8px;" id="prod-category-tabs">
+          <button class="btn btn-ghost active" onclick="filterProductGrid('all', this)" id="tab-all-prod">الكل</button>
+          <button class="btn btn-ghost" onclick="filterProductGrid('proteins', this)" id="tab-proteins">بروتينات</button>
+          <button class="btn btn-ghost" onclick="filterProductGrid('preworkout', this)" id="tab-preworkout">ما قبل التمرين</button>
+          <button class="btn btn-ghost" onclick="filterProductGrid('vitamins', this)" id="tab-vitamins">فيتامينات</button>
+          <button class="btn btn-ghost" onclick="filterProductGrid('accessories', this)" id="tab-accessories">إكسسوارات</button>
+        </div>
+
+        <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 20px; margin-top: 20px;" id="admin-products-grid"></div>
+      </section>
+
+      <!-- Section D: 🏋️ Workout Creator -->
+      <section class="admin-section" style="display: none;" id="admin-workouts">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+          <h2 id="title-admin-workouts">جداول التمارين الأسبوعية</h2>
+          <button class="btn btn-primary" onclick="triggerAddWorkoutModal()">
+            <i data-lucide="plus"></i> <span id="btn-add-workout">إنشاء خطة جديدة</span>
+          </button>
+        </div>
+        <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 20px;" id="admin-workouts-container"></div>
+      </section>
+
+      <!-- Section E: 📊 Statistics Charts -->
+      <section class="admin-section" style="display: none;" id="admin-stats">
+        <h2 style="margin-bottom: 20px;" id="title-stats">تقارير الإحصائيات</h2>
+        
+        <div class="stats-summary">
+          <div class="glass-card summary-card success">
+            <div style="font-size: 0.8rem; color: var(--text-muted);" id="lbl-top-plan">أكثر خطة مبيعاً</div>
+            <div style="font-size: 1.5rem; font-weight: 800; color: var(--success); margin-top: 4px;" id="stats-top-plan">-</div>
+          </div>
+          <div class="glass-card summary-card secondary">
+            <div style="font-size: 0.8rem; color: var(--text-muted);" id="lbl-expected-revenue">الإيرادات المتوقعة هذا الشهر</div>
+            <div style="font-size: 1.5rem; font-weight: 800; color: var(--secondary); margin-top: 4px; font-family: var(--font-data);" id="stats-exp-rev">0 IQD</div>
+          </div>
+          <div class="glass-card summary-card warning">
+            <div style="font-size: 0.8rem; color: var(--text-muted);" id="lbl-avg-duration">متوسط مدة الاشتراك للأعضاء</div>
+            <div style="font-size: 1.5rem; font-weight: 800; color: var(--warning); margin-top: 4px;" id="stats-avg-days">0 يوم</div>
+          </div>
+        </div>
+
+        <div style="display: grid; grid-template-columns: 1fr 1.2fr; gap: 20px; margin-bottom: 20px;">
+          <div class="glass-card" style="display: flex; flex-direction: column; justify-content: center; align-items: center;">
+            <h3 style="margin-bottom: 10px;" id="title-plan-split">توزيع الخطط</h3>
+            <div class="donut-chart" id="stats-donut">
+              <div class="donut-center-text">
+                <span style="font-size: 0.8rem; color: var(--text-muted);" id="lbl-active-total">النشطين</span>
+                <div style="font-size: 1.4rem; font-weight: 800; font-family: var(--font-data);" id="stats-active-total-num">0</div>
+              </div>
+            </div>
+            <div style="display: flex; gap: 15px; margin-top: 15px; font-size: 0.8rem;" id="stats-plans-legend"></div>
+          </div>
+
+          <div class="glass-card">
+            <h3 style="margin-bottom: 10px;" id="title-subscription-status">حالة الاشتراكات</h3>
+            <div class="horiz-chart" id="stats-status-chart"></div>
+          </div>
+        </div>
+
+        <div class="glass-card">
+          <h3 id="title-new-members-chart">الأعضاء الجدد شهرياً</h3>
+          <div class="chart-box" id="stats-registrations-bar-chart"></div>
+        </div>
+      </section>
+
+      <!-- Section F: 🔔 Urgency Alerts & Notifications -->
+      <section class="admin-section" style="display: none;" id="admin-notifications">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+          <h2 id="title-notifications">الإشعارات والتنبيهات</h2>
+          <button class="btn btn-primary" onclick="triggerBulkWhatsAppAlerts()">
+            <i data-lucide="message-square"></i> <span id="btn-whatsapp-bulk">إرسال واتساب للكل</span>
+          </button>
+        </div>
+        <div style="display: flex; flex-direction: column; gap: 12px;" id="admin-notifications-container"></div>
+      </section>
+
+      <!-- Section G: ⚙️ Settings Profile & Trainer CRUD -->
+      <section class="admin-section" style="display: none;" id="admin-settings">
+        <h2 style="margin-bottom: 20px;" id="title-settings-page">الإعدادات العامة للأنظمة</h2>
+        
+        <div class="grid-2">
+          <!-- Owner Profile Section -->
+          <div class="glass-card">
+            <h3 style="margin-bottom: 15px;" id="title-owner-profile">ملف المالك وتغيير كلمة المرور</h3>
+            <form onsubmit="executeChangePassword(event)">
+              <div class="form-group">
+                <label class="form-label" id="lbl-owner-name">اسم المالك</label>
+                <input type="text" class="form-input" id="owner-name-input" value="تيتان جيم أدمن">
+              </div>
+              <div class="form-group">
+                <label class="form-label" id="lbl-gym-phone">رقم هاتف الجيم</label>
+                <input type="text" class="form-input" id="gym-phone-input" value="07701234567" style="font-family: var(--font-data);">
+              </div>
+              <div class="form-group">
+                <label class="form-label" id="lbl-curr-pass">كلمة المرور الحالية</label>
+                <input type="password" class="form-input" id="pass-current" required>
+              </div>
+              <div class="form-group">
+                <label class="form-label" id="lbl-new-pass">كلمة المرور الجديدة</label>
+                <input type="password" class="form-input" id="pass-new" required>
+              </div>
+              <div class="form-group">
+                <label class="form-label" id="lbl-confirm-pass">تأكيد كلمة المرور الجديدة</label>
+                <input type="password" class="form-input" id="pass-confirm" required>
+              </div>
+              <div style="display: flex; gap: 10px; justify-content: flex-end; margin-top: 15px;">
+                <button type="button" class="btn btn-ghost" onclick="executeDatabaseReset()" id="btn-reset-db">إعادة تعيين البيانات</button>
+                <button type="submit" class="btn btn-primary" id="btn-save-settings">حفظ التغييرات</button>
+              </div>
+            </form>
+          </div>
+
+          <!-- Trainers CRUD Section -->
+          <div class="glass-card">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+              <h3 id="title-trainer-mgmt">إدارة المدربين المسؤولين</h3>
+              <button class="btn btn-ghost" style="padding: 6px 12px;" onclick="triggerAddTrainerModal()">
+                <i data-lucide="plus"></i> <span id="btn-add-trainer">إضافة مدرب</span>
+              </button>
+            </div>
+            <div class="table-container" style="max-height: 380px; overflow-y: auto;">
+              <table class="data-table">
+                <thead>
+                  <tr>
+                    <th id="th-trainer-name">الاسم</th>
+                    <th id="th-trainer-phone">الهاتف</th>
+                    <th id="th-trainer-spec">التخصص</th>
+                    <th id="th-trainer-mcount">اللاعبين</th>
+                    <th id="th-trainer-actions">إجراءات</th>
+                  </tr>
+                </thead>
+                <tbody id="trainers-settings-list"></tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </section>
+
+    </main>
+  </div>
+
+  <script>
+    // ═══════════════════════════════
+    // 🔌 SUPABASE CONFIGURATION
+    // ═══════════════════════════════
+    const SUPABASE_URL = "https://zeqtipkobxpqjjmqhjh.supabase.co";
+    const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InplcXRpcGtvYm94cHFqam1xaGpoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODE3NTQ3MjgsImV4cCI6MjA5NzMzMDcyOH0.EVkIY91wtbfVZbSjul0RyMdHINpexoHn8xJxvHGKLno";
+    const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+    // ═══════════════════════════════
+    // TRANSLATIONS DICTIONARY
+    // ═══════════════════════════════
+    const translations = {
+      en: {
+        login_sub: "ADMIN CONTROL CENTER",
+        btn_log_admin: "Admin Enter",
+        nav_dash: "Dashboard",
+        nav_mems: "Members",
+        nav_prods: "Products & Stock",
+        nav_works: "Workouts Schedule",
+        nav_st: "Statistics",
+        nav_notifs: "Alerts Panel",
+        nav_sets: "Settings",
+        logout: "Logout",
+        dash_ov: "Dashboard Overview",
+        btn_add_mem: "Add Athlete",
+        stat_tot: "Total Members",
+        stat_act: "Active Now",
+        stat_exp_soon: "Expiring (≤7 days)",
+        stat_expired: "Expired Subs",
+        stat_unpaid: "Unpaid Members",
+        title_alerts: "Follow-up alerts & WhatsApp notifications",
+        title_stock: "Low Product Stock Alerting",
+        title_registry: "Members Registry",
+        search_mem: "Search member name...",
+        tab_all: "All",
+        tab_act: "Active",
+        tab_exp: "Expiring",
+        tab_ex: "Expired",
+        tab_un: "Unpaid",
+        th_p: "Photo", th_n: "Name", th_ph: "Phone", th_pl: "Plan", th_pay: "Payment", th_s: "Status", th_exdate: "Expiry Date", th_d: "Days", th_t: "Trainer", th_act: "Actions",
+        title_inv: "Products & Supplements",
+        btn_add_p: "Add Product",
+        title_workouts: "Weekly Workout Plans",
+        btn_new_workout: "New Plan",
+        lbl_topplan: "Best Selling Plan",
+        lbl_exprev: "Expected Revenue",
+        lbl_avgdur: "Average Subs Days",
+        title_plansplit: "Plan Distribution Split",
+        lbl_activetot: "Active Members",
+        title_substatus: "Subscriptions Status Breakdown",
+        title_newmems: "Monthly Registrations",
+        title_settings: "Global Systems Settings",
+        title_profile: "Owner Profile & Password",
+        lbl_owner: "Owner Name",
+        lbl_gymphone: "Gym Phone Reference",
+        lbl_currpass: "Current Password",
+        lbl_newpass: "New Password",
+        lbl_confpass: "Confirm Password",
+        btn_reset: "Reset Database",
+        btn_save: "Save Config",
+        title_trainers: "Trainers Roster",
+        btn_add_trainer: "Add Trainer",
+        th_tr_n: "Name", th_tr_ph: "Phone", th_tr_sp: "Specialty", th_tr_mc: "Athletes", th_tr_ac: "Actions",
+        m_add_member: "Add New Athlete",
+        m_renew_member: "Renew Subscription",
+        m_add_product: "Add New Product",
+        m_edit_product: "Edit Product Details",
+        t_login_err_pass: "Incorrect owner credentials! Red Alert.",
+        t_success_renew: "Subscription renewed successfully!",
+        t_err_renew_active: "Cannot renew an active subscription!",
+        t_success_add: "Resource created successfully.",
+        t_success_del: "Resource deleted.",
+        t_success_update: "System settings saved successfully.",
+        t_err_trainer_delete: "Cannot delete a trainer who has athletes assigned!",
+        t_pass_mismatch: "New passwords do not match or current password is wrong!",
+        btn_whatsapp_bulk: "Send WhatsApp to All",
+        tab_proteins: "Proteins",
+        tab_preworkout: "Pre-Workout",
+        tab_vitamins: "Vitamins",
+        tab_accessories: "Accessories"
+      },
+      ar: {
+        login_sub: "لوحة التحكم بالإدارة وأنظمة الجيم",
+        btn_log_admin: "دخول المشرف",
+        nav_dash: "لوحة التحكم",
+        nav_mems: "سجل الأعضاء",
+        nav_prods: "المنتجات والمكملات",
+        nav_works: "التمارين",
+        nav_st: "الإحصائيات",
+        nav_notifs: "الإشعارات والتنبيهات",
+        nav_sets: "الإعدادات",
+        logout: "تسجيل الخروج",
+        dash_ov: "لوحة التحكم العامة",
+        btn_add_mem: "إضافة مشترك",
+        stat_tot: "إجمالي المشتركين",
+        stat_act: "نشط الآن",
+        stat_exp_soon: "ينتهي قريباً (≤7 أيام)",
+        stat_expired: "الاشتراكات المنتهية",
+        stat_unpaid: "غير واصلين / لم يدفعوا",
+        title_alerts: "تنبيهات المتابعة وتجديد الاشتراكات",
+        title_stock: "تنبيهات مخزون المنتجات المنخفض",
+        title_registry: "سجل الأعضاء والرياضيين",
+        search_mem: "بحث باسم العضو...",
+        tab_all: "الكل",
+        tab_act: "نشط",
+        tab_exp: "قارب الانتهاء",
+        tab_ex: "منتهي",
+        tab_un: "غير واصل",
+        th_p: "الصورة", th_n: "الاسم", th_ph: "الهاتف", th_pl: "الخطة", th_pay: "الدفع", th_s: "الاشتراك", th_exdate: "الانتهاء", th_d: "الأيام", th_t: "المدرب", th_act: "إجراءات",
+        title_inv: "المنتجات والمكملات الغذائية",
+        btn_add_p: "إضافة منتج",
+        title_workouts: "جداول التمارين الأسبوعية",
+        btn_new_workout: "إنشاء خطة جديدة",
+        lbl_topplan: "أكثر خطة مبيعاً",
+        lbl_exprev: "الإيرادات المتوقعة هذا الشهر",
+        lbl_avgdur: "متوسط مدة الاشتراك للأعضاء",
+        title_plansplit: "توزيع الخطط",
+        lbl_activetot: "النشطين",
+        title_substatus: "حالة الاشتراكات",
+        title_newmems: "الأعضاء الجدد شهرياً",
+        title_settings: "الإعدادات العامة للأنظمة",
+        title_profile: "ملف المالك وتغيير كلمة المرور",
+        lbl_owner: "اسم المالك",
+        lbl_gymphone: "رقم هاتف الجيم",
+        lbl_currpass: "كلمة المرور الحالية",
+        lbl_newpass: "كلمة المرور الجديدة",
+        lbl_confpass: "تأكيد كلمة المرور الجديدة",
+        btn_reset: "إعادة تعيين البيانات",
+        btn_save: "حفظ التغييرات",
+        title_trainers: "إدارة المدربين المسؤولين",
+        btn_add_trainer: "إضافة مدرب",
+        th_tr_n: "الاسم", th_tr_ph: "الهاتف", th_tr_sp: "التخصص", th_tr_mc: "اللاعبين", th_tr_ac: "إجراءات",
+        m_add_member: "إضافة لاعب جديد",
+        m_renew_member: "تجديد الاشتراك",
+        m_add_product: "إضافة منتج جديد",
+        m_edit_product: "تعديل بيانات المنتج",
+        t_login_err_pass: "كلمة مرور المشرف خاطئة!",
+        t_success_renew: "تم تجديد اشتراك اللاعب بنجاح!",
+        t_err_renew_active: "عذراً، لا يمكن التجديد والاشتراك الحالي نشط!",
+        t_success_add: "تم الإجراء بنجاح وحفظ البيانات.",
+        t_success_del: "تم الحذف وحفظ السجل.",
+        t_success_update: "تم تحديث وحفظ الإعدادات بنجاح.",
+        t_err_trainer_delete: "لا يمكن حذف مدرب مرتبط بلاعبين حالياً!",
+        t_pass_mismatch: "تنبيه: كلمات المرور غير متطابقة أو كلمة المرور الحالية خاطئة!",
+        btn_whatsapp_bulk: "إرسال واتساب للكل",
+        tab_proteins: "بروتينات",
+        tab_preworkout: "ما قبل التمرين",
+        tab_vitamins: "فيتامينات",
+        tab_accessories: "إكسسوارات"
+      }
+    };
+
+    // ═══════════════════════════════
+    // 💳 SUBSCRIPTIONS PLANS
+    // ═══════════════════════════════
+    const SUBSCRIPTION_PLANS = [
+      { id: "daily", name_ar: "يومي", name_en: "Daily", duration: 1, price: 3000 },
+      { id: "weekly", name_ar: "أسبوعي", name_en: "Weekly", duration: 7, price: 10000 },
+      { id: "regular", name_ar: "عادي", name_en: "Regular", duration: 30, price: 35000 },
+      { id: "fitness", name_ar: "رشاقة", name_en: "Fitness", duration: 30, price: 40000 }
+    ];
+
+    // ═══════════════════════════════
+    // 💊 DEFAULT PRODUCT DATABASE
+    // ═══════════════════════════════
+    const DEFAULT_PRODUCTS = [
+      { id: "p1", name_ar: "واي جولد ستاندرد 2.27 كجم", name_en: "Whey Gold Standard 2.27kg", price: 85000, qty: 8, category: "proteins" },
+      { id: "p2", name_ar: "كازين بروتين 1.8 كجم", name_en: "Casein Protein 1.8kg", price: 72000, qty: 4, category: "proteins" },
+      { id: "p3", name_ar: "بروتين نباتي 1 كجم", name_en: "Plant Protein 1kg", price: 55000, qty: 6, category: "proteins" },
+      { id: "p4", name_ar: "سي 4 بري-ورك أوت 30 جرعة", name_en: "C4 Original 30srv", price: 45000, qty: 3, category: "preworkout" },
+      { id: "p5", name_ar: "غوست بري-ورك أوت", name_en: "Ghost Pre-Workout", price: 52000, qty: 7, category: "preworkout" },
+      { id: "p6", name_ar: "أوميغا-3 200 كبسولة", name_en: "Omega-3 200caps", price: 25000, qty: 12, category: "vitamins" },
+      { id: "p7", name_ar: "فيتامين د3+ك2", name_en: "Vitamin D3+K2", price: 18000, qty: 9, category: "vitamins" },
+      { id: "p8", name_ar: "زد إم إيه 90 كبسولة", name_en: "ZMA 90caps", price: 22000, qty: 5, category: "vitamins" },
+      { id: "p9", name_ar: "كفوف تمرين وحماية رياضية", name_en: "Gym Gloves", price: 15000, qty: 10, category: "accessories" },
+      { id: "p10", name_ar: "حبال مقاومة مطاطية", name_en: "Resistance Bands", price: 28000, qty: 6, category: "accessories" },
+      { id: "p11", name_ar: "شيكر نيون للخلط 700 مل", name_en: "Shaker Bottle", price: 8000, qty: 2, category: "accessories" },
+      { id: "p12", name_ar: "حزام تمرين جلدي للظهر", name_en: "Gym Belt", price: 35000, qty: 4, category: "accessories" }
+    ];
+
+    // ═══════════════════════════════
+    // 💾 GLOBAL STATE SCHEMA
+    // ═══════════════════════════════
+    let state = {
+      lang: "ar",
+      currentView: "login",
+      currentUserType: null,
+      currentMemberId: null,
+      adminPassword: "titan2025",
+      ownerProfile: { name: "تيتان جيم أدمن", phone: "07701234567" },
+      trainers: [],
+      members: [],
+      products: [],
+      workouts: [],
+      customWorkouts: [],
+      pinnedWorkout: {},
+      workoutRatings: {},
+      bodyMeasurements: {},
+      calorieGoals: {},
+      nutritionDiary: {}
+    };
+
+    // ═══════════════════════════════
+    // 🛠️ SYSTEM INITIALIZER
+    // ═══════════════════════════════
+    function getDefault7DayPlan() {
+      return {
+        id: "work_default7",
+        name: "البرنامج الأساسي - تقسيم 7 أيام",
+        level: "intermediate",
+        schedule: {
+          sat: [{ name: "Bench Press (ضغط صدر بارز)", sets: 4, reps: 10, weight: 60, note: "" }, { name: "Incline Dumbbell Press (صدر علوي دمبل)", sets: 3, reps: 12, weight: 24, note: "" }, { name: "Tricep Pushdown (تمرين ظهر الذراع كيبل)", sets: 3, reps: 12, weight: 20, note: "" }, { name: "Overhead Tricep Extension (مد ظهر الذراع)", sets: 3, reps: 12, weight: 15, note: "" }],
+          sun: [{ name: "Barbell Row (سحب بار)", sets: 4, reps: 10, weight: 70, note: "" }, { name: "Lat Pulldown (سحب عمودي)", sets: 3, reps: 12, weight: 55, note: "" }, { name: "Barbell Curl (كيرل بار)", sets: 3, reps: 12, weight: 30, note: "" }, { name: "Hammer Curl (كيرل مطرقة)", sets: 3, reps: 12, weight: 14, note: "" }],
+          mon: [{ name: "Squat (سكوات بالبار)", sets: 4, reps: 10, weight: 80, note: "تركيز على النزول الكامل" }, { name: "Leg Press (ضغط أرجل)", sets: 3, reps: 15, weight: 120, note: "" }, { name: "Leg Curl (كيرل أرجل)", sets: 3, reps: 12, weight: 40, note: "" }, { name: "Calf Raises (رفع أصابع القدم)", sets: 4, reps: 20, weight: 60, note: "" }],
+          tue: [],
+          wed: [{ name: "Overhead Press (ضغط أكتاف بار)", sets: 4, reps: 10, weight: 50, note: "" }, { name: "Lateral Raise (رفع جانبي دمبل)", sets: 3, reps: 15, weight: 12, note: "" }, { name: "Front Raise (رفع أمامي)", sets: 3, reps: 12, weight: 10, note: "" }, { name: "Close-Grip Bench (ضغط صدر قبضة ضيقة)", sets: 3, reps: 12, weight: 50, note: "تمرين مشترك أكتاف + ظهر ذراع" }],
+          thu: [{ name: "Incline Bench Press (ضغط صدر علوي)", sets: 3, reps: 12, weight: 50, note: "خفيف - التركيز على الشكل" }, { name: "Cable Flyes (تمرين صدر كيبل)", sets: 3, reps: 15, weight: 15, note: "" }, { name: "Seated Row (سحب كيبل جلوس)", sets: 3, reps: 12, weight: 45, note: "" }, { name: "Rear Delt Fly (رفع خلفي لعضلة الكتف الخلفية)", sets: 3, reps: 15, weight: 10, note: "" }],
+          fri: []
+        }
+      };
+    }
+
+    async function initApp() {
+      try {
+        const { data, error } = await supabaseClient
+          .from('gym_state')
+          .select('data')
+          .eq('id', 'main')
+          .single();
+        
+        if (data && data.data && Object.keys(data.data).length > 0) {
+          state = data.data;
+          console.log("Loaded state from Supabase");
+        } else {
+          loadLocalFallback();
+        }
+      } catch (err) {
+        console.error("Error loading from Supabase, trying localStorage:", err);
+        loadLocalFallback();
+      }
+
+      // Migration: replace old 3-day plan with new 7-day default
+      const hasOld = state.workouts && state.workouts.some(w => w.id === "work_pre1");
+      const hasNew = state.workouts && state.workouts.some(w => w.id === "work_default7");
+      if (hasOld && !hasNew) {
+        state.workouts = state.workouts.filter(w => w.id !== "work_pre1");
+        state.workouts.unshift(getDefault7DayPlan());
+        saveState();
+      } else if (!state.workouts || state.workouts.length === 0) {
+        state.workouts = [getDefault7DayPlan()];
+        saveState();
+      }
+      
+      applyLanguageSettings();
+      router();
+      
+      window.addEventListener("resize", () => {
+        if (window.innerWidth > 768) {
+          document.getElementById("admin-sidebar").classList.remove("active");
+        }
+      });
+    }
+
+    function loadLocalFallback() {
+      const stored = localStorage.getItem("titan_gym_v3_state");
+      if (stored) {
+        state = JSON.parse(stored);
+      } else {
+        seedFreshData();
+      }
+    }
+
+    function seedFreshData() {
+      state.trainers = [
+        { id: "tr1", name: "كريم العبيدي", phone: "07701111111", specialty: "كمال أجسام", loginCode: "1111" },
+        { id: "tr2", name: "ليلى حسين", phone: "07702222222", specialty: "رشاقة وكارديو", loginCode: "2222" },
+        { id: "tr3", name: "محمد ياسر", phone: "07703333333", specialty: "كروس فيت", loginCode: "3333" }
+      ];
+
+      state.members = [
+        { id: "mem1", photo: "", name: "أحمد حسن", phone: "07701234561", planId: "fitness", payment_status: "paid", startDate: "2026-06-12", expiryDate: "2026-07-12", trainerId: "tr1", note: "تطوير مستوى الفتنس" },
+        { id: "mem2", photo: "", name: "عمر خليل", phone: "07701234562", planId: "regular", payment_status: "paid", startDate: "2026-06-11", expiryDate: "2026-07-11", trainerId: "tr3", note: "" },
+        { id: "mem3", photo: "", name: "سارة محمد", phone: "07701234563", planId: "regular", payment_status: "unpaid", startDate: "2026-05-01", expiryDate: "2026-05-31", trainerId: "tr2", note: "إصابة سابقة في الركبة" },
+        { id: "mem4", photo: "", name: "زيد الراشد", phone: "07701234564", planId: "fitness", payment_status: "paid", startDate: "2026-05-15", expiryDate: "2026-07-31", trainerId: "tr1", note: "" },
+        { id: "mem5", photo: "", name: "لينا أحمد", phone: "07701234565", planId: "regular", payment_status: "paid", startDate: "2026-06-01", expiryDate: "2026-06-19", trainerId: "tr2", note: "" },
+        { id: "mem6", photo: "", name: "مصطفى علي", phone: "07701234566", planId: "daily", payment_status: "paid", startDate: "2026-06-16", expiryDate: "2026-06-17", trainerId: "tr3", note: "" },
+        { id: "mem7", photo: "", name: "نور إبراهيم", phone: "07701234567", planId: "fitness", payment_status: "paid", startDate: "2026-06-15", expiryDate: "2026-08-15", trainerId: "tr2", note: "" },
+        { id: "mem8", photo: "", name: "كريم صالح", phone: "07701234568", planId: "weekly", payment_status: "unpaid", startDate: "2026-05-01", expiryDate: "2026-06-11", trainerId: "tr1", note: "" },
+        { id: "mem9", photo: "", name: "فاطمة حسن", phone: "07701234569", planId: "regular", payment_status: "paid", startDate: "2026-06-10", expiryDate: "2026-07-10", trainerId: "tr2", note: "" },
+        { id: "mem10", photo: "", name: "علي محمد", phone: "07701234570", planId: "fitness", payment_status: "paid", startDate: "2026-06-16", expiryDate: "2026-07-16", trainerId: "tr3", note: "" }
+      ];
+
+      state.members.forEach(mem => {
+        const plan = SUBSCRIPTION_PLANS.find(p => p.id === mem.planId);
+        mem.renewal_history = [
+          { date: mem.startDate, planId: mem.planId, amountPaid: plan ? plan.price : 0, note: "تسجيل مبدئي وتفعيل خطة العضو" }
+        ];
+      });
+
+      state.products = DEFAULT_PRODUCTS;
+
+      state.workouts = [
+        {
+          id: "work_default7",
+          name: "البرنامج الأساسي - تقسيم 7 أيام",
+          level: "intermediate",
+          schedule: {
+            sat: [{ name: "Bench Press (ضغط صدر بارز)", sets: 4, reps: 10, weight: 60, note: "" }, { name: "Incline Dumbbell Press (صدر علوي دمبل)", sets: 3, reps: 12, weight: 24, note: "" }, { name: "Tricep Pushdown (تمرين ظهر الذراع كيبل)", sets: 3, reps: 12, weight: 20, note: "" }, { name: "Overhead Tricep Extension (مد ظهر الذراع)", sets: 3, reps: 12, weight: 15, note: "" }],
+            sun: [{ name: "Barbell Row (سحب بار)", sets: 4, reps: 10, weight: 70, note: "" }, { name: "Lat Pulldown (سحب عمودي)", sets: 3, reps: 12, weight: 55, note: "" }, { name: "Barbell Curl (كيرل بار)", sets: 3, reps: 12, weight: 30, note: "" }, { name: "Hammer Curl (كيرل مطرقة)", sets: 3, reps: 12, weight: 14, note: "" }],
+            mon: [{ name: "Squat (سكوات بالبار)", sets: 4, reps: 10, weight: 80, note: "تركيز على النزول الكامل" }, { name: "Leg Press (ضغط أرجل)", sets: 3, reps: 15, weight: 120, note: "" }, { name: "Leg Curl (كيرل أرجل)", sets: 3, reps: 12, weight: 40, note: "" }, { name: "Calf Raises (رفع أصابع القدم)", sets: 4, reps: 20, weight: 60, note: "" }],
+            tue: [],
+            wed: [{ name: "Overhead Press (ضغط أكتاف بار)", sets: 4, reps: 10, weight: 50, note: "" }, { name: "Lateral Raise (رفع جانبي دمبل)", sets: 3, reps: 15, weight: 12, note: "" }, { name: "Front Raise (رفع أمامي)", sets: 3, reps: 12, weight: 10, note: "" }, { name: "Close-Grip Bench (ضغط صدر قبضة ضيقة)", sets: 3, reps: 12, weight: 50, note: "تمرين مشترك أكتاف + ظهر ذراع" }],
+            thu: [{ name: "Incline Bench Press (ضغط صدر علوي)", sets: 3, reps: 12, weight: 50, note: "خفيف - التركيز على الشكل" }, { name: "Cable Flyes (تمرين صدر كيبل)", sets: 3, reps: 15, weight: 15, note: "" }, { name: "Seated Row (سحب كيبل جلوس)", sets: 3, reps: 12, weight: 45, note: "" }, { name: "Rear Delt Fly (رفع خلفي لعضلة الكتف الخلفية)", sets: 3, reps: 15, weight: 10, note: "" }],
+            fri: []
+          }
+        }
+      ];
+
+      state.workoutRatings = {
+        "mem1": [
+          { date: "2026-06-13", rating: 4, note: "تمرين قوي وتركيز ممتاز" },
+          { date: "2026-06-14", rating: 5, note: "نشاط عالي جداً اليوم" },
+          { date: "2026-06-15", rating: 3, note: "شعرت ببعض التعب في البداية" }
+        ]
+      };
+      state.bodyMeasurements = {
+        "mem1": [
+          { date: "2026-06-01", weight: 82, waist: 88, chest: 102, arms: 36 },
+          { date: "2026-06-08", weight: 80.5, waist: 86.5, chest: 102.5, arms: 36.3 },
+          { date: "2026-06-15", weight: 79.8, waist: 85, chest: 103, arms: 36.5 }
+        ]
+      };
+      state.calorieGoals = {
+        "mem1": { kcal: 2200, prot: 160, carbs: 220, fat: 70 }
+      };
+
+      saveState();
+    }
+
+    async function saveState() {
+      localStorage.setItem("titan_gym_v3_state", JSON.stringify(state));
+      try {
+        const { error } = await supabaseClient
+          .from('gym_state')
+          .upsert({ id: 'main', data: state, updated_at: new Date().toISOString() });
+        if (error) {
+          console.error("Error saving to Supabase:", error);
+        } else {
+          console.log("Saved state to Supabase successfully");
+        }
+      } catch (err) {
+        console.error("Failed to save to Supabase:", err);
+      }
+    }
+
+    // ═══════════════════════════════
+    // 🌐 ROUTING & AUTH MECHANICS
+    // ═══════════════════════════════
+    window.addEventListener("hashchange", router);
+
+    function router() {
+      const hash = window.location.hash || "#login";
+      hideModal();
+
+      document.getElementById("login-view").classList.remove("active");
+      document.getElementById("admin-view").classList.remove("active");
+
+      if (hash === "#login") {
+        document.getElementById("login-view").classList.add("active");
+        state.currentView = "login";
+        state.currentUserType = null;
+        sessionStorage.clear();
+      } 
+      else if (hash.startsWith("#admin")) {
+        const sessionToken = sessionStorage.getItem("titan_admin_session");
+        if (!sessionToken || state.currentUserType !== "admin") {
+          window.location.hash = "#login";
+          return;
+        }
+        document.getElementById("admin-view").classList.add("active");
+        state.currentView = "admin";
+        
+        applyRolePermissions();
+        
+        const sub = hash.split("/")[1] || "dashboard";
+        const role = sessionStorage.getItem("titan_admin_role");
+        if (role === "captain" && (sub === "products" || sub === "stats" || sub === "settings")) {
+          window.location.hash = "#admin/dashboard";
+          return;
+        }
+        
+        switchAdminSection(`admin-${sub}`, false);
+      }
+      lucide.createIcons();
+    }
+
+    // ═══════════════════════════════
+    // 🇬🇧 LANGUAGE MANAGEMENT (AR/EN)
+    // ═══════════════════════════════
+    function toggleLanguage() {
+      state.lang = state.lang === "ar" ? "en" : "ar";
+      saveState();
+      applyLanguageSettings();
+      
+      if (state.currentView === "admin") {
+        const activeSection = document.querySelector(".admin-section.active").id;
+        switchAdminSection(activeSection, false);
+      } else {
+        router();
+      }
+    }
+
+    function applyLanguageSettings() {
+      const isRtl = state.lang === "ar";
+      document.documentElement.dir = isRtl ? "rtl" : "ltr";
+      document.documentElement.lang = state.lang;
+      
+      document.getElementById("lang-toggle-label").textContent = isRtl ? "EN" : "AR";
+      translateElements();
+    }
+
+    // Shielded DOM updates to prevent Null ref errors when nodes are missing
+    function setElementText(id, text) {
+      const el = document.getElementById(id);
+      if (el) el.textContent = text;
+    }
+    function setElementPlaceholder(id, val) {
+      const el = document.getElementById(id);
+      if (el) el.placeholder = val;
+    }
+
+    function translateElements() {
+      const dict = translations[state.lang];
+      
+      setElementText("login-sub-title", dict.login_sub);
+      setElementText("tab-member-btn", "دخول اللاعبين");
+      setElementText("tab-admin-btn", "إدارة الجيم");
+      setElementText("lbl-password-login", dict.lbl_pass || "كلمة مرور النظام");
+      setElementText("btn-login-admin", dict.btn_log_admin);
+
+      // Sidebar menu
+      const navDash = document.querySelector("#nav-dash span"); if (navDash) navDash.textContent = dict.nav_dash;
+      const navMems = document.querySelector("#nav-members span"); if (navMems) navMems.textContent = dict.nav_mems;
+      const navProds = document.querySelector("#nav-products span"); if (navProds) navProds.textContent = dict.nav_prods;
+      const navWorks = document.querySelector("#nav-workouts span"); if (navWorks) navWorks.textContent = dict.nav_works;
+      const navStats = document.querySelector("#nav-stats span"); if (navStats) navStats.textContent = dict.nav_st;
+      const navNotifs = document.querySelector("#nav-notifications span"); if (navNotifs) navNotifs.textContent = dict.nav_notifs;
+      const navSets = document.querySelector("#nav-settings span"); if (navSets) navSets.textContent = dict.nav_sets;
+      setElementText("btn-logout-admin", dict.logout);
+      
+      // Admin labels
+      setElementText("title-dash-ov", dict.dash_ov);
+      setElementText("btn-add-member-dash", dict.btn_add_mem);
+      setElementText("stat-total-label", dict.stat_tot);
+      setElementText("stat-active-label", dict.stat_act);
+      setElementText("stat-expiring-label", dict.stat_exp_soon);
+      setElementText("stat-expired-label", dict.stat_expired);
+      setElementText("stat-unpaid-label", dict.stat_unpaid);
+      setElementText("title-alerts-panel", dict.title_alerts);
+      setElementText("title-stock-alerts", dict.title_stock);
+      setElementText("title-members-registry", dict.title_registry);
+      setElementPlaceholder("member-search-input", dict.search_mem);
+      setElementText("btn-add-member-registry", dict.btn_add_mem);
+      setElementText("tab-all-mem", dict.tab_all);
+      setElementText("tab-active-mem", dict.tab_act);
+      setElementText("tab-expiring-mem", dict.tab_exp);
+      setElementText("tab-expired-mem", dict.tab_ex);
+      setElementText("tab-unpaid-mem", dict.tab_un);
+
+      setElementText("th-photo", dict.th_p);
+      setElementText("th-name", dict.th_n);
+      setElementText("th-phone", dict.th_ph);
+      setElementText("th-plan", dict.th_pl);
+      setElementText("th-payment", dict.th_pay);
+      setElementText("th-sub", dict.th_s);
+      setElementText("th-expiry", dict.th_exdate);
+      setElementText("th-days", dict.th_d);
+      setElementText("th-trainer", dict.th_t);
+      setElementText("th-actions", dict.th_act);
+
+      setElementText("title-inventory", dict.title_inv);
+      setElementText("btn-add-product", dict.btn_add_p);
+      setElementText("tab-all-prod", dict.tab_all);
+      setElementText("tab-proteins", dict.tab_proteins);
+      setElementText("tab-preworkout", dict.tab_preworkout);
+      setElementText("tab-vitamins", dict.tab_vitamins);
+      setElementText("tab-accessories", dict.tab_accessories);
+
+      setElementText("title-admin-workouts", dict.title_workouts);
+      setElementText("btn-add-workout", dict.btn_new_workout);
+      
+      setElementText("title-stats", dict.nav_st);
+      setElementText("lbl-top-plan", dict.lbl_topplan);
+      setElementText("lbl-expected-revenue", dict.lbl_exprev);
+      setElementText("lbl-avg-duration", dict.lbl_avgdur);
+      setElementText("title-plan-split", dict.title_plansplit);
+      setElementText("lbl-active-total", dict.lbl_activetot);
+      setElementText("title-subscription-status", dict.title_substatus);
+      setElementText("title-new-members-chart", dict.title_newmems);
+      
+      setElementText("title-notifications", dict.nav_notifs);
+      setElementText("btn-whatsapp-bulk", dict.btn_whatsapp_bulk);
+
+      setElementText("title-settings-page", dict.title_settings);
+      setElementText("title-owner-profile", dict.title_profile);
+      setElementText("lbl-owner-name", dict.lbl_owner);
+      setElementText("lbl-gym-phone", dict.lbl_gymphone);
+      setElementText("lbl-curr-pass", dict.lbl_currpass);
+      setElementText("lbl-new-pass", dict.lbl_newpass);
+      setElementText("lbl-confirm-pass", dict.lbl_confpass);
+      setElementText("btn-reset-db", dict.btn_reset);
+      setElementText("btn-save-settings", dict.btn_save);
+      
+      setElementText("title-trainer-mgmt", dict.title_trainers);
+      setElementText("btn-add-trainer", dict.btn_add_trainer);
+      setElementText("th-trainer-name", dict.th_tr_n);
+      setElementText("th-trainer-phone", dict.th_tr_ph);
+      setElementText("th-trainer-spec", dict.th_tr_sp);
+      setElementText("th-trainer-mcount", dict.th_tr_mc);
+      setElementText("th-trainer-actions", dict.th_tr_ac);
+    }
+
+    // ═══════════════════════════════
+    // 📯 TOAST SYSTEM
+    // ═══════════════════════════════
+    function showToast(msg, type = "primary") {
+      const container = document.getElementById("toast-container");
+      const id = "toast_" + Date.now();
+      
+      const el = document.createElement("div");
+      el.className = `toast ${type}`;
+      el.id = id;
+      el.innerHTML = `
+        <div style="flex: 1;">
+          <div style="font-weight: 800; font-size: 0.8rem; letter-spacing: 1px; color: var(--text-muted); margin-bottom: 2px;">${type.toUpperCase()}</div>
+          <div style="font-size: 0.85rem; font-weight: 600;">${msg}</div>
+        </div>
+        <button style="background:transparent; border:none; color:var(--text-muted); font-size: 1.1rem;" onclick="dismissToast('${id}')">&times;</button>
+      `;
+      
+      container.appendChild(el);
+      setTimeout(() => dismissToast(id), 3000);
+    }
+
+    function dismissToast(id) {
+      const el = document.getElementById(id);
+      if (el) {
+        el.style.animation = "slideIn 0.25s reverse forwards";
+        setTimeout(() => el.remove(), 250);
+      }
+    }
+
+    // ═══════════════════════════════
+    // 🚪 AUTHENTICATION PROCESSES
+    // ═══════════════════════════════
+    function executeAdminLogin(e) {
+      e.preventDefault();
+      const pass = document.getElementById("login-password").value;
+      
+      if (pass === state.adminPassword) {
+        state.currentUserType = "admin";
+        sessionStorage.setItem("titan_admin_session", "session_" + Date.now());
+        sessionStorage.setItem("titan_admin_role", "owner");
+        
+        window.location.hash = `#admin/dashboard`;
+        showToast(state.lang === 'ar' ? "تم تسجيل الدخول كمشرف للنظام 🛡️" : "Logged in as Administrator 🛡️", "success");
+        return;
+      }
+      
+      // Check if it matches any trainer's loginCode
+      const trainer = state.trainers.find(t => t.loginCode === pass);
+      if (trainer) {
+        state.currentUserType = "admin";
+        sessionStorage.setItem("titan_admin_session", "session_" + Date.now());
+        sessionStorage.setItem("titan_admin_role", "captain");
+        sessionStorage.setItem("titan_captain_id", trainer.id);
+        
+        window.location.hash = `#admin/dashboard`;
+        showToast(state.lang === 'ar' ? `تم تسجيل الدخول ككابتن: ${trainer.name} 🎽` : `Logged in as Captain: ${trainer.name} 🎽`, "success");
+        return;
+      }
+      
+      showToast(translations[state.lang].t_login_err_pass, "danger");
+    }
+
+    function executeLogout() {
+      state.currentUserType = null;
+      sessionStorage.clear();
+      window.location.hash = "#login";
+    }
+
+    function applyRolePermissions() {
+      const role = sessionStorage.getItem("titan_admin_role");
+      const captainId = sessionStorage.getItem("titan_captain_id");
+      
+      if (role === "captain") {
+        const trainer = state.trainers.find(t => t.id === captainId);
+        const trainerName = trainer ? trainer.name : "";
+        
+        // Hide owner-only sidebar elements
+        document.querySelectorAll(".owner-only").forEach(el => el.style.display = "none");
+        
+        // Customize Dashboard title
+        const dashTitle = document.getElementById("title-dash-ov");
+        if (dashTitle) {
+          dashTitle.textContent = state.lang === "ar" ? `لوحة تحكم الكابتن: ${trainerName}` : `Captain Dashboard: ${trainerName}`;
+        }
+        
+        // Hide low stock panel in dashboard
+        const stockAlerts = document.getElementById("title-stock-alerts");
+        if (stockAlerts && stockAlerts.parentElement) {
+          stockAlerts.parentElement.style.display = "none";
+        }
+      } else {
+        // Show owner-only elements
+        document.querySelectorAll(".owner-only").forEach(el => el.style.display = "block");
+        
+        const dashTitle = document.getElementById("title-dash-ov");
+        if (dashTitle) {
+          dashTitle.textContent = state.lang === "ar" ? "لوحة التحكم العامة" : "General Dashboard";
+        }
+        
+        const stockAlerts = document.getElementById("title-stock-alerts");
+        if (stockAlerts && stockAlerts.parentElement) {
+          stockAlerts.parentElement.style.display = "block";
+        }
+      }
+    }
+
+    // ═══════════════════════════════
+    // 📦 MODAL SYSTEM
+    // ═══════════════════════════════
+    function showModal(title, bodyHtml) {
+      document.getElementById("modal-title").textContent = title;
+      document.getElementById("modal-body").innerHTML = bodyHtml;
+      document.getElementById("modal-overlay").classList.add("active");
+      lucide.createIcons();
+    }
+
+    function hideModal() {
+      document.getElementById("modal-overlay").classList.remove("active");
+    }
+
+    function closeModalOutside(e) {
+      if (e.target.id === "modal-overlay") hideModal();
+    }
+
+    // ═══════════════════════════════
+    // 👑 ADMIN SECTION SWITCHING & RENDERERS
+    // ═══════════════════════════════
+    function toggleSidebarMenu() {
+      const sidebar = document.getElementById("admin-sidebar");
+      const icon = document.getElementById("hamburger-icon");
+      if (sidebar.classList.contains("active")) {
+        sidebar.classList.remove("active");
+        icon.setAttribute("data-lucide", "menu");
+      } else {
+        sidebar.classList.add("active");
+        icon.setAttribute("data-lucide", "x");
+      }
+      lucide.createIcons();
+    }
+
+    function switchAdminSection(sectionId, shouldCloseMobile = true) {
+      document.querySelectorAll(".sidebar-link").forEach(link => {
+        link.classList.remove("active");
+        if (link.getAttribute("onclick").includes(`'${sectionId}'`)) {
+          link.classList.add("active");
+        }
+      });
+
+      document.querySelectorAll(".admin-section").forEach(sec => sec.style.display = "none");
+      document.getElementById(sectionId).style.display = "block";
+
+      if (shouldCloseMobile) {
+        document.getElementById("admin-sidebar").classList.remove("active");
+        document.getElementById("hamburger-icon").setAttribute("data-lucide", "menu");
+      }
+
+      if (sectionId === "admin-dashboard") renderAdminDashboard();
+      else if (sectionId === "admin-members") renderRegistryTable();
+      else if (sectionId === "admin-products") renderAdminProductsGrid();
+      else if (sectionId === "admin-workouts") renderAdminWorkoutsGrid();
+      else if (sectionId === "admin-stats") renderStatisticsView();
+      else if (sectionId === "admin-notifications") renderNotificationsView();
+      else if (sectionId === "admin-settings") renderSettingsView();
+
+      lucide.createIcons();
+    }
+
+    // ═══════════════════════════════
+    // 🏠 ADMIN VIEW A: DASHBOARD
+    // ═══════════════════════════════
+    function renderAdminDashboard() {
+      const role = sessionStorage.getItem("titan_admin_role");
+      const captainId = sessionStorage.getItem("titan_captain_id");
+      let membersList = state.members;
+      if (role === "captain") {
+        membersList = state.members.filter(m => m.trainerId === captainId);
+      }
+      
+      let tot = membersList.length;
+      let act = 0, expg = 0, expd = 0, unpd = 0;
+      
+      membersList.forEach(m => {
+        const status = getSubscriptionStatus(m.expiryDate);
+        if (status === "active") act++;
+        else if (status === "expiring") expg++;
+        else if (status === "expired") expd++;
+        
+        if (m.payment_status === "unpaid" && status !== "expired") unpd++;
+      });
+
+      animateVal("dash-total-members", tot);
+      animateVal("dash-active-members", act);
+      animateVal("dash-expiring-members", expg);
+      animateVal("dash-expired-members", expd);
+      animateVal("dash-unpaid-members", unpd);
+
+      // WhatsApp reminders Alerts panel
+      const alertsList = document.getElementById("dashboard-alerts-list");
+      alertsList.innerHTML = "";
+      
+      const expiringList = membersList.filter(m => {
+        const status = getSubscriptionStatus(m.expiryDate);
+        return status === "expiring" || status === "expired" || (m.payment_status === "unpaid" && status !== "expired");
+      });
+
+      if (expiringList.length === 0) {
+        alertsList.innerHTML = `<div style="text-align:center; padding:20px; color:var(--text-muted); font-size:0.85rem;">كل المشتركين نشطين وواصلين الدفع 👍</div>`;
+      } else {
+        expiringList.forEach(m => {
+          const status = getSubscriptionStatus(m.expiryDate);
+          const days = getDaysRemaining(m.expiryDate);
+          
+          let alertLabel = "";
+          let btnClass = "btn-danger";
+          let type = "unpaid";
+          
+          if (status === "expired") {
+            alertLabel = state.lang === "ar" ? `منتهي الاشتراك منذ ${Math.abs(days)} أيام` : `Expired ${Math.abs(days)} days ago`;
+            type = "expired";
+          } else if (status === "expiring") {
+            alertLabel = state.lang === "ar" ? `ينتهي خلال ${days} أيام` : `Expires in ${days} days`;
+            type = "expiring";
+            btnClass = "btn-ghost";
+          } else {
+            alertLabel = state.lang === "ar" ? "غير واصل (لم يدفع)" : "Unpaid";
+            type = "unpaid";
+            btnClass = "btn-ghost";
+          }
+
+          const div = document.createElement("div");
+          div.className = "glass-card";
+          div.style.padding = "10px 15px";
+          div.style.display = "flex";
+          div.style.justify = "space-between";
+          div.style.alignItems = "center";
+          div.innerHTML = `
+            <div>
+              <div style="font-weight: 700; font-size: 0.9rem;">${m.name}</div>
+              <div style="font-size: 0.75rem; color: var(--text-muted); margin-top: 2px;">${alertLabel}</div>
+            </div>
+            <button class="btn ${btnClass}" style="padding: 6px 12px; font-size: 0.75rem;" onclick="triggerWhatsAppRemind('${m.id}', '${type}')">
+              <i data-lucide="message-square"></i> واتساب
+            </button>
+          `;
+          alertsList.appendChild(div);
+        });
+      }
+
+      // Low Stock products list
+      const stockList = document.getElementById("dashboard-stock-alerts");
+      stockList.innerHTML = "";
+      
+      const lowStockItems = state.products.filter(p => p.qty < 5);
+      if (lowStockItems.length === 0) {
+        stockList.innerHTML = `<div style="text-align:center; padding:20px; color:var(--text-muted); font-size:0.85rem;">المخزون متوفر بالكامل بشكل ممتاز 📦</div>`;
+      } else {
+        lowStockItems.forEach(p => {
+          const div = document.createElement("div");
+          div.className = "glass-card";
+          div.style.padding = "10px 15px";
+          div.style.display = "flex";
+          div.style.justify = "space-between";
+          div.style.alignItems = "center";
+          div.style.borderColor = "rgba(255, 45, 85, 0.2)";
+          div.innerHTML = `
+            <div>
+              <div style="font-weight: 700; font-size: 0.9rem;">${state.lang === 'ar' ? p.name_ar : p.name_en}</div>
+              <div style="font-size: 0.75rem; color: var(--danger); font-weight:700; margin-top:2px;">الكمية المتبقية: ${p.qty} items</div>
+            </div>
+            <span class="badge badge-danger">مخزون حرج</span>
+          `;
+          stockList.appendChild(div);
+        });
+      }
+    }
+
+    function animateVal(elId, target) {
+      const el = document.getElementById(elId);
+      if (!el) return;
+      let curr = 0;
+      const step = Math.ceil(target / 25) || 1;
+      const timer = setInterval(() => {
+        curr += step;
+        if (curr >= target) {
+          el.textContent = target.toLocaleString();
+          clearInterval(timer);
+        } else {
+          el.textContent = curr.toLocaleString();
+        }
+      }, 20);
+    }
+
+    // ═══════════════════════════════
+    // 👥 ADMIN VIEW B: MEMBERS REGISTRY
+    // ═══════════════════════════════
+    let currentMembersFilter = "all";
+
+    function filterMembersList(filter, btn) {
+      currentMembersFilter = filter;
+      document.querySelectorAll("#members-filter-tabs button").forEach(b => b.classList.remove("active"));
+      btn.classList.add("active");
+      renderRegistryTable();
+    }
+
+    function renderRegistryTable() {
+      const tbody = document.getElementById("registry-table-body");
+      tbody.innerHTML = "";
+      
+      const q = document.getElementById("member-search-input").value.toLowerCase();
+      
+      const role = sessionStorage.getItem("titan_admin_role");
+      const captainId = sessionStorage.getItem("titan_captain_id");
+      let membersList = state.members;
+      if (role === "captain") {
+        membersList = state.members.filter(m => m.trainerId === captainId);
+      }
+      
+      let filtered = membersList.filter(m => m.name.toLowerCase().includes(q));
+      
+      if (currentMembersFilter !== "all") {
+        filtered = filtered.filter(m => {
+          const status = getSubscriptionStatus(m.expiryDate);
+          if (currentMembersFilter === "active") return status === "active";
+          if (currentMembersFilter === "expiring") return status === "expiring";
+          if (currentMembersFilter === "expired") return status === "expired";
+          if (currentMembersFilter === "unpaid") return m.payment_status === "unpaid" && status !== "expired";
+        });
+      }
+
+      if (filtered.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="10" style="text-align: center; color: var(--text-muted); padding: 25px;">لا يوجد نتائج لعرضها</td></tr>`;
+        return;
+      }
+
+      filtered.forEach(m => {
+        const status = getSubscriptionStatus(m.expiryDate);
+        const days = getDaysRemaining(m.expiryDate);
+        const plan = SUBSCRIPTION_PLANS.find(p => p.id === m.planId);
+        const trainer = state.trainers.find(t => t.id === m.trainerId);
+        
+        let badgeHtml = "";
+        if (status === "expired") {
+          badgeHtml = `<span class="badge badge-danger status-pulse">🔴 منتهي الاشتراك</span>`;
+        } else if (m.payment_status === "unpaid") {
+          badgeHtml = `<span class="badge badge-danger status-pulse">🔴 غير واصل</span>`;
+        } else if (status === "active") {
+          badgeHtml = `<span class="badge badge-success">🟢 واصل ونشط</span>`;
+        } else if (status === "expiring") {
+          badgeHtml = `<span class="badge badge-warning">🟡 واصل - قارب الانتهاء</span>`;
+        }
+
+        const isPhoto = m.photo ? `background-image: url('${m.photo}')` : "";
+        const row = document.createElement("tr");
+        row.innerHTML = `
+          <td><div class="photo-preview-circle" style="width: 38px; height: 38px; ${isPhoto}"></div></td>
+          <td style="font-weight: 700;">${m.name}</td>
+          <td class="font-data">${m.phone}</td>
+          <td>${plan ? (state.lang === 'ar' ? plan.name_ar : plan.name_en) : ""}</td>
+          <td>
+            <button class="btn btn-ghost" style="padding: 4px 8px; font-size: 0.75rem;" onclick="togglePaymentState('${m.id}')">
+              ${m.payment_status === 'paid' ? '✔️ واصل' : '❌ لم يدفع'}
+            </button>
+          </td>
+          <td>${badgeHtml}</td>
+          <td class="font-data">${m.expiryDate}</td>
+          <td class="font-data">${days} يوم</td>
+          <td>${trainer ? trainer.name : "غير محدد"}</td>
+          <td>
+            <div style="display: flex; gap: 6px;">
+              <button class="btn btn-ghost" style="padding: 4px 8px;" onclick="triggerWhatsAppRemind('${m.id}')" title="واتساب"><i data-lucide="message-square" style="width:14px; height:14px;"></i></button>
+              <button class="btn btn-ghost" style="padding: 4px 8px;" onclick="triggerRenewalModal('${m.id}')" title="تجديد الاشتراك"><i data-lucide="refresh-cw" style="width:14px; height:14px;"></i></button>
+              <button class="btn btn-ghost" style="padding: 4px 8px;" onclick="triggerHistoryModal('${m.id}')" title="تاريخ التجديد"><i data-lucide="file-text" style="width:14px; height:14px;"></i></button>
+              <button class="btn btn-ghost" style="padding: 4px 8px;" onclick="printMemberCard('${m.id}')" title="طباعة الكارت"><i data-lucide="printer" style="width:14px; height:14px;"></i></button>
+              <button class="btn btn-ghost" style="padding: 4px 8px;" onclick="triggerEditMemberModal('${m.id}')" title="تعديل"><i data-lucide="edit" style="width:14px; height:14px;"></i></button>
+              <button class="btn btn-danger" style="padding: 4px 8px;" onclick="executeDeleteMember('${m.id}')" title="حذف"><i data-lucide="trash-2" style="width:14px; height:14px;"></i></button>
+            </div>
+          </td>
+        `;
+        tbody.appendChild(row);
+      });
+      lucide.createIcons();
+    }
+
+    function togglePaymentState(memberId) {
+      const m = state.members.find(x => x.id === memberId);
+      if (!m) return;
+
+      const body = `
+        <div style="display:flex; flex-direction:column; gap:10px;">
+          <button class="btn btn-ghost" style="justify-content:flex-start; padding:12px; font-size:0.95rem; border-color:var(--success); color:var(--success);" onclick="setMemberPaymentStatus('${m.id}', 'paid', 'دفع كامل نقداً')">
+            💵 واصل - دفع كامل (نقداً IQD)
+          </button>
+          <button class="btn btn-ghost" style="justify-content:flex-start; padding:12px; font-size:0.95rem; border-color:var(--primary); color:var(--primary);" onclick="setMemberPaymentStatus('${m.id}', 'paid', 'دفع كامل بالبطاقة')">
+            💳 واصل - دفع كامل (بطاقة الكترونية)
+          </button>
+          <button class="btn btn-ghost" style="justify-content:flex-start; padding:12px; font-size:0.95rem; border-color:var(--warning); color:var(--warning);" onclick="setMemberPaymentStatus('${m.id}', 'paid', 'دفع جزئي')">
+            🔲 واصل - دفع جزئي
+          </button>
+          <button class="btn btn-ghost" style="justify-content:flex-start; padding:12px; font-size:0.95rem; border-color:var(--danger); color:var(--danger);" onclick="setMemberPaymentStatus('${m.id}', 'unpaid', 'لم يسدد بعد')">
+            ❌ غير واصل - لم يسدد بعد
+          </button>
+          <button class="btn btn-ghost" style="justify-content:flex-start; padding:12px; font-size:0.95rem; border-color:var(--text-muted); color:var(--text-muted);" onclick="setMemberPaymentStatus('${m.id}', 'paid', 'إعفاء - اشتراك مجاني')">
+            🎁 إعفاء - اشتراك مجاني
+          </button>
+        </div>
+      `;
+      showModal(state.lang === 'ar' ? `تعديل حالة الدفع للمشترك: ${m.name}` : `Update Payment for: ${m.name}`, body);
+    }
+
+    function setMemberPaymentStatus(memberId, status, note) {
+      const m = state.members.find(x => x.id === memberId);
+      if (m) {
+        m.payment_status = status;
+        if (m.renewal_history && m.renewal_history.length > 0) {
+          m.renewal_history[m.renewal_history.length - 1].note = note;
+          m.renewal_history[m.renewal_history.length - 1].amountPaid = (status === 'paid' ? (SUBSCRIPTION_PLANS.find(p => p.id === m.planId)?.price || 0) : 0);
+        }
+        saveState();
+        hideModal();
+        renderRegistryTable();
+        renderAdminDashboard();
+        showToast(translations[state.lang].t_success_update || "تم التحديث بنجاح", "success");
+      }
+    }
+
+    let tempBase64Photo = "";
+    function triggerAddMemberModal() {
+      tempBase64Photo = "";
+      let planOptions = SUBSCRIPTION_PLANS.map(p => `<option value="${p.id}">${state.lang === 'ar' ? p.name_ar : p.name_en} — ${p.price.toLocaleString()} د.ع</option>`).join("");
+      
+      const role = sessionStorage.getItem("titan_admin_role");
+      const captainId = sessionStorage.getItem("titan_captain_id");
+      let trainerOptions = "";
+      if (role === "captain") {
+        const t = state.trainers.find(x => x.id === captainId);
+        trainerOptions = `<option value="${t.id}" selected>${t.name}</option>`;
+      } else {
+        trainerOptions = state.trainers.map(t => `<option value="${t.id}">${t.name} (${t.specialty})</option>`).join("");
+      }
+      
+      const body = `
+        <form onsubmit="executeAddMember(event)" style="display:flex; flex-direction:column; gap:12px;">
+          <div style="display:flex; gap:15px; align-items:center; margin-bottom:10px;">
+            <div id="modal-photo-preview" class="photo-preview-circle"></div>
+            <div>
+              <label class="form-label">الصورة الشخصية (اختياري)</label>
+              <input type="file" accept="image/*" class="form-input" onchange="encodePhotoToBase64(this)">
+            </div>
+          </div>
+          <div class="form-group">
+            <label class="form-label">الاسم الكامل (مطلوب)</label>
+            <input type="text" class="form-input" id="add-mem-name" required placeholder="أحمد حسن علي">
+          </div>
+          <div class="form-group">
+            <label class="form-label">رقم الهاتف (مطلوب، فريد، 07XXXXXXXXX)</label>
+            <input type="text" class="form-input" id="add-mem-phone" required placeholder="07701234567" style="font-family: var(--font-data);">
+          </div>
+          <div class="form-group">
+            <label class="form-label">خطة الاشتراك</label>
+            <select class="form-select" id="add-mem-plan">${planOptions}</select>
+          </div>
+          <div class="form-group">
+            <label class="form-label">تاريخ البداية</label>
+            <input type="date" class="form-input" id="add-mem-start" value="${getTodayDateString()}" required>
+          </div>
+          <div class="form-group">
+            <label class="form-label">حالة الدفع</label>
+            <select class="form-select" id="add-mem-payment">
+              <option value="paid">واصل (تم الدفع)</option>
+              <option value="unpaid">غير واصل (لم يدفع)</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label">المدرب المسؤول</label>
+            <select class="form-select" id="add-mem-trainer">${trainerOptions}</select>
+          </div>
+          <div class="form-group">
+            <label class="form-label">ملاحظات طبية / رياضية (اختياري)</label>
+            <textarea class="form-input" id="add-mem-note" placeholder="مثال: إصابة في الركبة..."></textarea>
+          </div>
+          <button type="submit" class="btn btn-primary" style="width:100%; margin-top:10px;">إضافة وحفظ البيانات</button>
+        </form>
+      `;
+      showModal(translations[state.lang].m_add_member, body);
+    }
+
+    function encodePhotoToBase64(input) {
+      const file = input.files[0];
+      if (file) {
+        const reader = new FileReader();
+        reader.onload = function(e) {
+          tempBase64Photo = e.target.result;
+          const preview = document.getElementById("modal-photo-preview");
+          if (preview) {
+            preview.style.backgroundImage = `url('${tempBase64Photo}')`;
+          }
+        };
+        reader.readAsDataURL(file);
+      }
+    }
+
+    function executeAddMember(e) {
+      e.preventDefault();
+      const name = document.getElementById("add-mem-name").value.trim();
+      const phone = document.getElementById("add-mem-phone").value.trim();
+      const planId = document.getElementById("add-mem-plan").value;
+      const startDate = document.getElementById("add-mem-start").value;
+      const payment_status = document.getElementById("add-mem-payment").value;
+      const trainerId = document.getElementById("add-mem-trainer").value;
+      const note = document.getElementById("add-mem-note").value.trim();
+
+      const phoneRegex = /^07[7895]\d{8}$/;
+      if (!phoneRegex.test(phone)) {
+        alert(state.lang === 'ar' ? "رقم الهاتف غير صالح! يجب أن يتكون من 11 رقماً ويبدأ بـ 07" : "Invalid phone number format!");
+        return;
+      }
+      if (state.members.some(m => m.phone === phone)) {
+        alert(state.lang === 'ar' ? "رقم الهاتف هذا مسجل مسبقاً لعضو آخر!" : "Phone number already exists!");
+        return;
+      }
+
+      const plan = SUBSCRIPTION_PLANS.find(p => p.id === planId);
+      const expiryDate = calculateExpiryDate(startDate, plan.duration);
+
+      const newMember = {
+        id: "mem_" + Date.now(),
+        photo: tempBase64Photo,
+        name,
+        phone,
+        planId,
+        payment_status,
+        startDate,
+        expiryDate,
+        trainerId,
+        note,
+        renewal_history: [
+          { date: startDate, planId, amountPaid: payment_status === 'paid' ? plan.price : 0, note: "تفعيل التسجيل الأول" }
+        ]
+      };
+
+      state.members.push(newMember);
+      saveState();
+      hideModal();
+      
+      renderRegistryTable();
+      renderAdminDashboard();
+      showToast(translations[state.lang].t_success_add, "success");
+    }
+
+    function calculateExpiryDate(startDateStr, durationDays) {
+      const d = new Date(startDateStr);
+      d.setDate(d.getDate() + durationDays);
+      return d.toISOString().split("T")[0];
+    }
+
+    function triggerEditMemberModal(id) {
+      const m = state.members.find(x => x.id === id);
+      if (!m) return;
+      tempBase64Photo = m.photo;
+
+      let planOptions = SUBSCRIPTION_PLANS.map(p => `<option value="${p.id}" ${p.id === m.planId ? 'selected' : ''}>${state.lang === 'ar' ? p.name_ar : p.name_en} — ${p.price.toLocaleString()} د.ع</option>`).join("");
+      
+      const role = sessionStorage.getItem("titan_admin_role");
+      const captainId = sessionStorage.getItem("titan_captain_id");
+      let trainerOptions = "";
+      if (role === "captain") {
+        const t = state.trainers.find(x => x.id === captainId);
+        trainerOptions = `<option value="${t.id}" selected>${t.name}</option>`;
+      } else {
+        trainerOptions = state.trainers.map(t => `<option value="${t.id}" ${t.id === m.trainerId ? 'selected' : ''}>${t.name} (${t.specialty})</option>`).join("");
+      }
+      
+      const isPhoto = m.photo ? `background-image: url('${m.photo}')` : "";
+
+      const body = `
+        <form onsubmit="executeEditMember(event, '${m.id}')" style="display:flex; flex-direction:column; gap:12px;">
+          <div style="display:flex; gap:15px; align-items:center; margin-bottom:10px;">
+            <div id="modal-photo-preview" class="photo-preview-circle" style="${isPhoto}"></div>
+            <div>
+              <label class="form-label">الصورة الشخصية (تغيير)</label>
+              <input type="file" accept="image/*" class="form-input" onchange="encodePhotoToBase64(this)">
+            </div>
+          </div>
+          <div class="form-group">
+            <label class="form-label">الاسم الكامل</label>
+            <input type="text" class="form-input" id="edit-mem-name" value="${m.name}" required>
+          </div>
+          <div class="form-group">
+            <label class="form-label">رقم الهاتف</label>
+            <input type="text" class="form-input" id="edit-mem-phone" value="${m.phone}" required style="font-family: var(--font-data);">
+          </div>
+          <div class="form-group">
+            <label class="form-label">خطة الاشتراك</label>
+            <select class="form-select" id="edit-mem-plan">${planOptions}</select>
+          </div>
+          <div class="form-group">
+            <label class="form-label">تاريخ البداية</label>
+            <input type="date" class="form-input" id="edit-mem-start" value="${m.startDate}" required>
+          </div>
+          <div class="form-group">
+            <label class="form-label">تاريخ الانتهاء</label>
+            <input type="date" class="form-input" id="edit-mem-expiry" value="${m.expiryDate}" required>
+          </div>
+          <div class="form-group">
+            <label class="form-label">المدرب المسؤول</label>
+            <select class="form-select" id="edit-mem-trainer">${trainerOptions}</select>
+          </div>
+          <div class="form-group">
+            <label class="form-label">ملاحظات طبية / رياضية</label>
+            <textarea class="form-input" id="edit-mem-note">${m.note}</textarea>
+          </div>
+          <button type="submit" class="btn btn-primary" style="width:100%; margin-top:10px;">حفظ التعديلات</button>
+        </form>
+      `;
+      showModal(state.lang === 'ar' ? "تعديل بيانات العضو" : "Edit Member Account", body);
+    }
+
+    function executeEditMember(e, id) {
+      e.preventDefault();
+      const m = state.members.find(x => x.id === id);
+      if (!m) return;
+
+      const name = document.getElementById("edit-mem-name").value.trim();
+      const phone = document.getElementById("edit-mem-phone").value.trim();
+      const planId = document.getElementById("edit-mem-plan").value;
+      const startDate = document.getElementById("edit-mem-start").value;
+      const expiryDate = document.getElementById("edit-mem-expiry").value;
+      const trainerId = document.getElementById("edit-mem-trainer").value;
+      const note = document.getElementById("edit-mem-note").value.trim();
+
+      const phoneRegex = /^07[7895]\d{8}$/;
+      if (!phoneRegex.test(phone)) {
+        alert("رقم الهاتف غير صالح!");
+        return;
+      }
+      if (state.members.some(x => x.phone === phone && x.id !== id)) {
+        alert("رقم الهاتف مسجل مسبقاً لعضو آخر!");
+        return;
+      }
+
+      m.photo = tempBase64Photo;
+      m.name = name;
+      m.phone = phone;
+      m.planId = planId;
+      m.startDate = startDate;
+      m.expiryDate = expiryDate;
+      m.trainerId = trainerId;
+      m.note = note;
+
+      saveState();
+      hideModal();
+      renderRegistryTable();
+      renderAdminDashboard();
+      showToast(translations[state.lang].t_success_add, "success");
+    }
+
+    function triggerRenewalModal(id) {
+      const m = state.members.find(x => x.id === id);
+      if (!m) return;
+
+      const days = getDaysRemaining(m.expiryDate);
+      if (days > 0) {
+        showToast(translations[state.lang].t_err_renew_active, "danger");
+        return;
+      }
+
+      let planOptions = SUBSCRIPTION_PLANS.map(p => `<option value="${p.id}" ${p.id === m.planId ? 'selected' : ''}>${state.lang === 'ar' ? p.name_ar : p.name_en} — ${p.price.toLocaleString()} د.ع</option>`).join("");
+      
+      const body = `
+        <form onsubmit="executeRenewMember(event, '${m.id}')" style="display:flex; flex-direction:column; gap:12px;">
+          <div style="font-weight: 700; color:var(--primary);">${m.name}</div>
+          <div class="form-group">
+            <label class="form-label">خطة التجديد</label>
+            <select class="form-select" id="renew-plan">${planOptions}</select>
+          </div>
+          <div class="form-group">
+            <label class="form-label">تاريخ البداية (تاريخ اليوم تلقائياً)</label>
+            <input type="date" class="form-input" id="renew-start" value="${getTodayDateString()}" required>
+          </div>
+          <div class="form-group">
+            <label class="form-label">حالة الدفع للتجديد</label>
+            <select class="form-select" id="renew-payment">
+              <option value="paid">واصل (تم دفع قيمة التجديد)</option>
+              <option value="unpaid">غير واصل (لم يدفع للتجديد بعد)</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label">ملاحظة التجديد (اختياري)</label>
+            <input type="text" class="form-input" id="renew-note" placeholder="مثال: تم التجديد والدفع نقداً">
+          </div>
+          <button type="submit" class="btn btn-primary" style="width:100%; margin-top:10px;">إرسال والتجديد الفوري</button>
+        </form>
+      `;
+      showModal(translations[state.lang].m_renew_member, body);
+    }
+
+    function executeRenewMember(e, id) {
+      e.preventDefault();
+      const m = state.members.find(x => x.id === id);
+      if (!m) return;
+
+      const planId = document.getElementById("renew-plan").value;
+      const startDate = document.getElementById("renew-start").value;
+      const payment_status = document.getElementById("renew-payment").value;
+      const note = document.getElementById("renew-note").value.trim();
+
+      const plan = SUBSCRIPTION_PLANS.find(p => p.id === planId);
+      const expiryDate = calculateExpiryDate(startDate, plan.duration);
+
+      m.planId = planId;
+      m.startDate = startDate;
+      m.expiryDate = expiryDate;
+      m.payment_status = payment_status;
+      
+      m.renewal_history.push({
+        date: startDate,
+        planId,
+        amountPaid: payment_status === 'paid' ? plan.price : 0,
+        note: note || "تجديد دورة الاشتراك"
+      });
+
+      saveState();
+      hideModal();
+      renderRegistryTable();
+      renderAdminDashboard();
+      showToast(translations[state.lang].t_success_renew, "success");
+    }
+
+    function triggerHistoryModal(id) {
+      const m = state.members.find(x => x.id === id);
+      if (!m) return;
+
+      let rows = m.renewal_history.map((h, i) => {
+        const plan = SUBSCRIPTION_PLANS.find(p => p.id === h.planId);
+        return `
+          <tr>
+            <td class="font-data">${i + 1}</td>
+            <td class="font-data">${h.date}</td>
+            <td>${plan ? (state.lang === 'ar' ? plan.name_ar : plan.name_en) : ""}</td>
+            <td class="font-data">${h.amountPaid.toLocaleString()} د.ع</td>
+            <td>${h.note}</td>
+          </tr>
+        `;
+      }).join("");
+
+      const body = `
+        <div class="table-container" style="max-height: 350px;">
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>#</th>
+                <th>تاريخ التجديد</th>
+                <th>الخطة</th>
+                <th>المبلغ المدفوع</th>
+                <th>ملاحظة</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${rows}
+            </tbody>
+          </table>
+        </div>
+      `;
+      showModal(`${m.name} — سجل عمليات التجديد`, body);
+    }
+
+    function executeDeleteMember(id) {
+      if (confirm(state.lang === 'ar' ? "هل أنت متأكد من رغبتك بحذف هذا العضو نهائياً؟" : "Are you sure you want to delete this athlete?")) {
+        state.members = state.members.filter(m => m.id !== id);
+        delete state.pinnedWorkout[id];
+        delete state.workoutRatings[id];
+        delete state.bodyMeasurements[id];
+        delete state.calorieGoals[id];
+        delete state.nutritionDiary[id];
+        state.customWorkouts = state.customWorkouts.filter(w => w.memberId !== id);
+        
+        saveState();
+        renderRegistryTable();
+        renderAdminDashboard();
+        showToast(translations[state.lang].t_success_del, "danger");
+      }
+    }
+
+    function printMemberCard(id) {
+      const m = state.members.find(x => x.id === id);
+      if (!m) return;
+      const plan = SUBSCRIPTION_PLANS.find(p => p.id === m.planId);
+      
+      const printDiv = document.getElementById("print-card-div");
+      printDiv.innerHTML = `
+        <div class="print-card-grid">
+          <div class="print-photo" style="background-image: url('${m.photo || ''}')"></div>
+          <div class="print-info">
+            <div class="print-title">🏋️ TITAN GYM CARD</div>
+            <div><b>الاسم:</b> ${m.name}</div>
+            <div><b>الخطة:</b> ${plan ? plan.name_ar : ""}</div>
+            <div><b>الانتهاء:</b> ${m.expiryDate}</div>
+            <div><b>الهاتف:</b> ${m.phone}</div>
+          </div>
+        </div>
+      `;
+      window.print();
+    }
+
+    // ═══════════════════════════════
+    // 💊 ADMIN VIEW C: PRODUCTS
+    // ═══════════════════════════════
+    let currentProductFilter = "all";
+
+    function filterProductGrid(cat, btn) {
+      currentProductFilter = cat;
+      document.querySelectorAll("#prod-category-tabs button").forEach(b => b.classList.remove("active"));
+      btn.classList.add("active");
+      renderAdminProductsGrid();
+    }
+
+    function renderAdminProductsGrid() {
+      const grid = document.getElementById("admin-products-grid");
+      grid.innerHTML = "";
+
+      let filtered = state.products;
+      if (currentProductFilter !== "all") {
+        filtered = filtered.filter(p => p.category === currentProductFilter);
+      }
+
+      filtered.forEach(p => {
+        const title = state.lang === "ar" ? p.name_ar : p.name_en;
+        const lowStock = p.qty < 5 ? `<span class="badge badge-danger">⚠️ مخزون منخفض</span>` : `<span class="badge badge-success">متوفر</span>`;
+        
+        const card = document.createElement("div");
+        card.className = "glass-card";
+        card.style.display = "flex";
+        card.style.flexDirection = "column";
+        card.style.justify = "space-between";
+        card.innerHTML = `
+          <div>
+            <div style="display:flex; justify-content:space-between; font-size:0.75rem; color:var(--text-muted); margin-bottom:8px;">
+              <span>Category: ${p.category}</span>
+              ${lowStock}
+            </div>
+            <h4 style="font-weight:700; font-size:1rem; margin-bottom:8px;">${title}</h4>
+            <div class="font-data" style="font-weight:700; color:var(--primary); font-size:1.15rem; margin-bottom:12px;">${p.price.toLocaleString()} د.ع</div>
+          </div>
+          <div style="display:flex; justify-content:space-between; align-items:center; border-top:1px solid var(--border); padding-top:10px;">
+            <span style="font-size:0.8rem; color:var(--text-muted);">المخزون: <b class="font-data">${p.qty}</b></span>
+            <div style="display:flex; gap:6px;">
+              <button class="btn btn-ghost" style="padding:4px 8px;" onclick="triggerEditProductModal('${p.id}')"><i data-lucide="edit" style="width:12px; height:12px;"></i></button>
+              <button class="btn btn-danger" style="padding:4px 8px;" onclick="executeDeleteProduct('${p.id}')"><i data-lucide="trash-2" style="width:12px; height:12px;"></i></button>
+            </div>
+          </div>
+        `;
+        grid.appendChild(card);
+      });
+      lucide.createIcons();
+    }
+
+    function triggerAddProductModal() {
+      const body = `
+        <form onsubmit="executeAddProduct(event)" style="display:flex; flex-direction:column; gap:12px;">
+          <div class="form-group">
+            <label class="form-label">الاسم بالعربية</label>
+            <input type="text" class="form-input" id="add-prod-ar" required placeholder="مثال: واي بروتين 2 كجم">
+          </div>
+          <div class="form-group">
+            <label class="form-label">الاسم بالإنجليزية</label>
+            <input type="text" class="form-input" id="add-prod-en" required placeholder="e.g. Whey Protein 2kg">
+          </div>
+          <div class="form-group">
+            <label class="form-label">القسم</label>
+            <select class="form-select" id="add-prod-cat">
+              <option value="proteins">بروتينات</option>
+              <option value="preworkout">ما قبل التمرين</option>
+              <option value="vitamins">فيتامينات وصحة</option>
+              <option value="accessories">إكسسوارات رياضية</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label">السعر (IQD)</label>
+            <input type="number" class="form-input" id="add-prod-price" required>
+          </div>
+          <div class="form-group">
+            <label class="form-label">الكمية بالمخزن</label>
+            <input type="number" class="form-input" id="add-prod-qty" required value="10">
+          </div>
+          <button type="submit" class="btn btn-primary" style="width:100%; margin-top:10px;">إضافة وحفظ بالمخزن</button>
+        </form>
+      `;
+      showModal(translations[state.lang].m_add_product, body);
+    }
+
+    function executeAddProduct(e) {
+      e.preventDefault();
+      const name_ar = document.getElementById("add-prod-ar").value.trim();
+      const name_en = document.getElementById("add-prod-en").value.trim();
+      const category = document.getElementById("add-prod-cat").value;
+      const price = parseInt(document.getElementById("add-prod-price").value);
+      const qty = parseInt(document.getElementById("add-prod-qty").value);
+
+      state.products.push({
+        id: "p_" + Date.now(),
+        name_ar, name_en, category, price, qty
+      });
+
+      saveState();
+      hideModal();
+      renderAdminProductsGrid();
+      renderAdminDashboard();
+      showToast(translations[state.lang].t_success_add, "success");
+    }
+
+    function triggerEditProductModal(id) {
+      const p = state.products.find(x => x.id === id);
+      if (!p) return;
+
+      const body = `
+        <form onsubmit="executeEditProduct(event, '${p.id}')" style="display:flex; flex-direction:column; gap:12px;">
+          <div class="form-group">
+            <label class="form-label">الاسم بالعربية</label>
+            <input type="text" class="form-input" id="edit-prod-ar" value="${p.name_ar}" required>
+          </div>
+          <div class="form-group">
+            <label class="form-label">الاسم بالإنجليزية</label>
+            <input type="text" class="form-input" id="edit-prod-en" value="${p.name_en}" required>
+          </div>
+          <div class="form-group">
+            <label class="form-label">القسم</label>
+            <select class="form-select" id="edit-prod-cat">
+              <option value="proteins" ${p.category === 'proteins' ? 'selected' : ''}>بروتينات</option>
+              <option value="preworkout" ${p.category === 'preworkout' ? 'selected' : ''}>ما قبل التمرين</option>
+              <option value="vitamins" ${p.category === 'vitamins' ? 'selected' : ''}>فيتامينات وصحة</option>
+              <option value="accessories" ${p.category === 'accessories' ? 'selected' : ''}>إكسسوارات رياضية</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label">السعر (IQD)</label>
+            <input type="number" class="form-input" id="edit-prod-price" value="${p.price}" required>
+          </div>
+          <div class="form-group">
+            <label class="form-label">الكمية بالمخزن</label>
+            <input type="number" class="form-input" id="edit-prod-qty" value="${p.qty}" required>
+          </div>
+          <button type="submit" class="btn btn-primary" style="width:100%; margin-top:10px;">حفظ التعديلات</button>
+        </form>
+      `;
+      showModal(translations[state.lang].m_edit_product, body);
+    }
+
+    function executeEditProduct(e, id) {
+      e.preventDefault();
+      const p = state.products.find(x => x.id === id);
+      if (!p) return;
+
+      p.name_ar = document.getElementById("edit-prod-ar").value.trim();
+      p.name_en = document.getElementById("edit-prod-en").value.trim();
+      p.category = document.getElementById("edit-prod-cat").value;
+      p.price = parseInt(document.getElementById("edit-prod-price").value);
+      p.qty = parseInt(document.getElementById("edit-prod-qty").value);
+
+      saveState();
+      hideModal();
+      renderAdminProductsGrid();
+      renderAdminDashboard();
+      showToast(translations[state.lang].t_success_add, "success");
+    }
+
+    function executeDeleteProduct(id) {
+      if (confirm("هل تريد حذف هذا المنتج من المخزن؟")) {
+        state.products = state.products.filter(p => p.id !== id);
+        saveState();
+        renderAdminProductsGrid();
+        renderAdminDashboard();
+        showToast(translations[state.lang].t_success_del, "danger");
+      }
+    }
+
+    // ═══════════════════════════════
+    // 🏋️ ADMIN VIEW D: WORKOUTS
+    // ═══════════════════════════════
+
+    const WEEK_DAYS = [
+      { key: "sat", labelAr: "السبت",     emoji: "💪" },
+      { key: "sun", labelAr: "الأحد",     emoji: "💪" },
+      { key: "mon", labelAr: "الاثنين",   emoji: "💪" },
+      { key: "tue", labelAr: "الثلاثاء",  emoji: "💪" },
+      { key: "wed", labelAr: "الأربعاء",  emoji: "💪" },
+      { key: "thu", labelAr: "الخميس",    emoji: "💪" },
+      { key: "fri", labelAr: "الجمعة",    emoji: "😴" }
+    ];
+
+    function renderAdminWorkoutsGrid() {
+      const container = document.getElementById("admin-workouts-container");
+      container.innerHTML = "";
+
+      if (state.workouts.length === 0) {
+        container.innerHTML = `<div style="grid-column: 1/-1; text-align:center; padding:30px; color:var(--text-muted);">لا يوجد برامج تمارين. قم بإنشاء خطة.</div>`;
+        return;
+      }
+
+      state.workouts.forEach(w => {
+        const totalExercises = WEEK_DAYS.reduce((acc, d) => acc + (w.schedule[d.key] ? w.schedule[d.key].length : 0), 0);
+        const workoutDays = WEEK_DAYS.filter(d => w.schedule[d.key] && w.schedule[d.key].length > 0).length;
+        const levelBadgeClass = w.level === 'beginner' ? 'badge-success' : w.level === 'advanced' ? 'badge-danger' : 'badge-warning';
+        const levelLabel = w.level === 'beginner' ? 'مبتدئ' : w.level === 'intermediate' ? 'متوسط' : 'متقدم';
+
+        const accordionRows = WEEK_DAYS.map(d => {
+          const exercises = w.schedule[d.key] || [];
+          const isRest = exercises.length === 0;
+          const exRows = exercises.map(e =>
+            `<div style="display:grid; grid-template-columns:2fr 1fr 1fr 1fr; gap:6px; padding:4px 0; border-bottom:1px solid rgba(255,255,255,0.04); font-size:0.78rem;">
+              <span style="color:var(--text-primary);">${e.name}</span>
+              <span style="color:var(--primary); text-align:center;">${e.sets} جولات</span>
+              <span style="color:var(--secondary); text-align:center;">${e.reps} تكرار</span>
+              <span style="color:var(--text-muted); text-align:center;">${e.weight ? e.weight + 'kg' : '-'}</span>
+            </div>`
+          ).join("");
+          const dayAccId = `acc-${w.id}-${d.key}`;
+          return `
+          <div style="border-bottom:1px solid var(--border);">
+            <button onclick="toggleDayAccordion('${dayAccId}')" style="width:100%; background:none; border:none; cursor:pointer; padding:10px 12px; display:flex; justify-content:space-between; align-items:center; color:var(--text-primary);">
+              <span style="font-weight:700; font-size:0.85rem;">${isRest ? '😴' : '💪'} ${d.labelAr}</span>
+              <span class="badge ${isRest ? 'badge-success' : 'badge-warning'}" style="font-size:0.7rem;">${isRest ? 'راحة' : exercises.length + ' تمارين'}</span>
+            </button>
+            <div id="${dayAccId}" style="display:none; padding:8px 12px 12px; background:rgba(0,0,0,0.15);">
+              ${isRest
+                ? `<div style="text-align:center; padding:10px; color:var(--text-muted); font-size:0.8rem;">يوم راحة تام — استرخِ وأنت في قمة التركيز 💤</div>`
+                : `<div style="display:grid; grid-template-columns:2fr 1fr 1fr 1fr; gap:6px; padding:4px 0; font-size:0.72rem; color:var(--text-muted); font-weight:600;">
+                    <span>التمرين</span><span style="text-align:center;">الجولات</span><span style="text-align:center;">التكرار</span><span style="text-align:center;">الوزن</span>
+                  </div>${exRows}`
+              }
+            </div>
+          </div>`;
+        }).join("");
+
+        const card = document.createElement("div");
+        card.className = "glass-card";
+        card.style.padding = "0";
+        card.style.overflow = "hidden";
+        card.innerHTML = `
+          <div style="padding:14px 16px; display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid var(--border);">
+            <div>
+              <h4 style="font-weight:800; color:var(--primary); margin-bottom:4px;">${w.name}</h4>
+              <div style="display:flex; gap:8px; align-items:center;">
+                <span class="badge ${levelBadgeClass}">${levelLabel}</span>
+                <span style="font-size:0.75rem; color:var(--text-muted);">${workoutDays} أيام تمرين · ${totalExercises} تمرين</span>
+              </div>
+            </div>
+            <button class="btn btn-danger" style="padding:6px 12px; font-size:0.75rem;" onclick="executeDeleteWorkout('${w.id}')">
+              <i data-lucide="trash-2" style="width:12px; height:12px;"></i> حذف
+            </button>
+          </div>
+          <div style="border-radius:0;">${accordionRows}</div>
+        `;
+        container.appendChild(card);
+      });
+      lucide.createIcons();
+    }
+
+    function toggleDayAccordion(id) {
+      const el = document.getElementById(id);
+      if (!el) return;
+      el.style.display = el.style.display === "none" ? "block" : "none";
+    }
+
+    // ── Temp state for the workout builder modal ──
+    let adminBuilderDays = {};
+
+    function triggerAddWorkoutModal() {
+      // Reset temp state
+      adminBuilderDays = {};
+      WEEK_DAYS.forEach(d => { adminBuilderDays[d.key] = []; });
+
+      const dayRows = WEEK_DAYS.map(d => `
+        <div style="border:1px solid var(--border); border-radius:8px; overflow:hidden; margin-bottom:8px;">
+          <div style="display:flex; justify-content:space-between; align-items:center; padding:10px 12px; background:rgba(0,0,0,0.2); cursor:pointer;" onclick="toggleAdminBuilderDay('builder-day-${d.key}')">
+            <span style="font-weight:700; font-size:0.85rem;">💪 ${d.labelAr}</span>
+            <span id="builder-badge-${d.key}" class="badge badge-success" style="font-size:0.7rem;">راحة</span>
+          </div>
+          <div id="builder-day-${d.key}" style="display:none; padding:10px; background:rgba(0,0,0,0.1);">
+            <div id="builder-exlist-${d.key}" style="font-size:0.8rem; color:var(--text-muted); margin-bottom:8px;">لا يوجد تمارين بعد.</div>
+            <div style="display:grid; grid-template-columns:2fr 1fr 1fr 1fr; gap:6px; margin-bottom:6px;">
+              <input type="text" class="form-input" id="bex-name-${d.key}" placeholder="اسم التمرين" style="font-size:0.8rem;">
+              <input type="number" class="form-input" id="bex-sets-${d.key}" placeholder="جولات" min="1" style="font-size:0.8rem;">
+              <input type="number" class="form-input" id="bex-reps-${d.key}" placeholder="تكرار" min="1" style="font-size:0.8rem;">
+              <input type="number" class="form-input" id="bex-wt-${d.key}" placeholder="كغم" min="0" style="font-size:0.8rem;">
+            </div>
+            <button class="btn btn-ghost" style="width:100%; padding:6px; font-size:0.8rem;" onclick="adminBuilderAddEx('${d.key}')">
+              <i data-lucide="plus" style="width:14px;height:14px;"></i> إضافة تمرين ليوم ${d.labelAr}
+            </button>
+          </div>
+        </div>`
+      ).join("");
+
+      const body = `
+        <div style="display:flex; flex-direction:column; gap:10px;">
+          <div class="form-group">
+            <label class="form-label">اسم البرنامج</label>
+            <input type="text" class="form-input" id="workout-plan-name" placeholder="مثال: برنامج التضخم - 5 أيام" required>
+          </div>
+          <div class="form-group">
+            <label class="form-label">المستوى</label>
+            <select class="form-select" id="workout-plan-level">
+              <option value="beginner">مبتدئ</option>
+              <option value="intermediate" selected>متوسط</option>
+              <option value="advanced">متقدم</option>
+            </select>
+          </div>
+          <div style="font-size:0.8rem; font-weight:700; color:var(--primary); margin-bottom:2px;">📅 جدول الأسبوع — اضغط على يوم لفتحه وإضافة تمارين</div>
+          ${dayRows}
+          <button class="btn btn-primary" style="width:100%; margin-top:8px;" onclick="executeAddWorkout()">
+            <i data-lucide="save" style="width:16px;height:16px;"></i> حفظ البرنامج الأسبوعي
+          </button>
+        </div>
+      `;
+      showModal("إنشاء خطة تمرين أسبوعية 🏋️", body);
+      lucide.createIcons();
+    }
+
+    function toggleAdminBuilderDay(id) {
+      const el = document.getElementById(id);
+      if (el) el.style.display = el.style.display === "none" ? "block" : "none";
+    }
+
+    function adminBuilderAddEx(dayKey) {
+      const nameEl = document.getElementById(`bex-name-${dayKey}`);
+      const setsEl = document.getElementById(`bex-sets-${dayKey}`);
+      const repsEl = document.getElementById(`bex-reps-${dayKey}`);
+      const wtEl   = document.getElementById(`bex-wt-${dayKey}`);
+
+      const name = nameEl.value.trim();
+      if (!name) { showToast("يرجى كتابة اسم التمرين", "warning"); return; }
+      const sets = parseInt(setsEl.value) || 3;
+      const reps = parseInt(repsEl.value) || 10;
+      const weight = parseFloat(wtEl.value) || 0;
+
+      adminBuilderDays[dayKey].push({ name, sets, reps, weight, note: "" });
+
+      // Update badge
+      const badge = document.getElementById(`builder-badge-${dayKey}`);
+      if (badge) {
+        badge.textContent = adminBuilderDays[dayKey].length + " تمارين";
+        badge.className = "badge badge-warning";
+      }
+      // Update list
+      const listEl = document.getElementById(`builder-exlist-${dayKey}`);
+      if (listEl) {
+        listEl.innerHTML = adminBuilderDays[dayKey].map((e, i) =>
+          `<div style="padding:3px 0; display:flex; justify-content:space-between;">
+            <span>• ${e.name}</span>
+            <span style="color:var(--text-muted);">${e.sets}×${e.reps} ${e.weight ? '@ '+e.weight+'kg' : ''}
+              <button onclick="adminBuilderRemoveEx('${dayKey}',${i})" style="background:none;border:none;cursor:pointer;color:var(--danger);font-size:0.75rem;margin-right:4px;">✕</button>
+            </span>
+          </div>`
+        ).join("");
+      }
+      // Clear inputs
+      nameEl.value = ""; setsEl.value = ""; repsEl.value = ""; wtEl.value = "";
+      nameEl.focus();
+    }
+
+    function adminBuilderRemoveEx(dayKey, idx) {
+      adminBuilderDays[dayKey].splice(idx, 1);
+      adminBuilderAddEx.__refreshList && adminBuilderAddEx.__refreshList(dayKey);
+      // Re-render the list
+      const listEl = document.getElementById(`builder-exlist-${dayKey}`);
+      if (listEl) {
+        listEl.innerHTML = adminBuilderDays[dayKey].length === 0
+          ? "لا يوجد تمارين بعد."
+          : adminBuilderDays[dayKey].map((e, i) =>
+              `<div style="padding:3px 0; display:flex; justify-content:space-between;">
+                <span>• ${e.name}</span>
+                <span style="color:var(--text-muted);">${e.sets}×${e.reps} ${e.weight ? '@ '+e.weight+'kg' : ''}
+                  <button onclick="adminBuilderRemoveEx('${dayKey}',${i})" style="background:none;border:none;cursor:pointer;color:var(--danger);font-size:0.75rem;margin-right:4px;">✕</button>
+                </span>
+              </div>`
+            ).join("");
+      }
+      const badge = document.getElementById(`builder-badge-${dayKey}`);
+      if (badge) {
+        if (adminBuilderDays[dayKey].length === 0) {
+          badge.textContent = "راحة"; badge.className = "badge badge-success";
+        } else {
+          badge.textContent = adminBuilderDays[dayKey].length + " تمارين";
+          badge.className = "badge badge-warning";
+        }
+      }
+    }
+
+    function executeAddWorkout() {
+      const name = document.getElementById("workout-plan-name");
+      if (!name || !name.value.trim()) { showToast("يرجى كتابة اسم البرنامج", "warning"); return; }
+      const level = document.getElementById("workout-plan-level").value;
+
+      const schedule = {};
+      WEEK_DAYS.forEach(d => { schedule[d.key] = adminBuilderDays[d.key] || []; });
+
+      state.workouts.push({
+        id: "work_" + Date.now(),
+        name: name.value.trim(),
+        level,
+        schedule
+      });
+
+      saveState();
+      hideModal();
+      renderAdminWorkoutsGrid();
+      showToast(translations[state.lang].t_success_add, "success");
+    }
+
+    function executeDeleteWorkout(id) {
+      if (confirm("هل تريد حذف هذا البرنامج الأسبوعي؟")) {
+        state.workouts = state.workouts.filter(w => w.id !== id);
+        for (const mId in state.pinnedWorkout) {
+          if (state.pinnedWorkout[mId] === id) {
+            delete state.pinnedWorkout[mId];
+          }
+        }
+        saveState();
+        renderAdminWorkoutsGrid();
+        showToast(translations[state.lang].t_success_del, "danger");
+      }
+    }
+
+    // ═══════════════════════════════
+    // 📊 ADMIN VIEW E: STATISTICS
+    // ═══════════════════════════════
+    function renderStatisticsView() {
+      let planSalesCount = { daily: 0, weekly: 0, regular: 0, fitness: 0 };
+      let revenueSum = 0;
+      let activeCount = 0;
+      let durationSum = 0;
+      
+      state.members.forEach(m => {
+        const status = getSubscriptionStatus(m.expiryDate);
+        const plan = SUBSCRIPTION_PLANS.find(p => p.id === m.planId);
+        
+        planSalesCount[m.planId]++;
+        
+        if (status !== "expired") {
+          activeCount++;
+          if (plan) {
+            revenueSum += plan.price;
+            durationSum += plan.duration;
+          }
+        }
+      });
+
+      let topPlanKey = "-";
+      let topPlanVal = -1;
+      for (const k in planSalesCount) {
+        if (planSalesCount[k] > topPlanVal) {
+          topPlanVal = planSalesCount[k];
+          topPlanKey = k;
+        }
+      }
+      
+      const topPlanObj = SUBSCRIPTION_PLANS.find(p => p.id === topPlanKey);
+      document.getElementById("stats-top-plan").textContent = topPlanObj ? `${state.lang === 'ar' ? topPlanObj.name_ar : topPlanObj.name_en} (${topPlanVal} مبيعات)` : "-";
+      document.getElementById("stats-exp-rev").textContent = `${revenueSum.toLocaleString()} د.ع`;
+      
+      const avgDuration = activeCount > 0 ? Math.round(durationSum / activeCount) : 0;
+      document.getElementById("stats-avg-days").textContent = `${avgDuration} ${state.lang === 'ar' ? 'يوم' : 'Days'}`;
+      document.getElementById("stats-active-total-num").textContent = activeCount;
+
+      // Conic Gradient Donut
+      let totActivePlans = 0;
+      let actPlanCounts = { daily: 0, weekly: 0, regular: 0, fitness: 0 };
+      state.members.forEach(m => {
+        if (getSubscriptionStatus(m.expiryDate) !== "expired") {
+          actPlanCounts[m.planId]++;
+          totActivePlans++;
+        }
+      });
+
+      let colors = ["var(--primary)", "var(--secondary)", "var(--danger)", "var(--warning)"];
+      let donutGradientString = "";
+      let startPercent = 0;
+      
+      const keys = Object.keys(actPlanCounts);
+      const legendContainer = document.getElementById("stats-plans-legend");
+      legendContainer.innerHTML = "";
+
+      keys.forEach((k, idx) => {
+        const plan = SUBSCRIPTION_PLANS.find(p => p.id === k);
+        const count = actPlanCounts[k];
+        const pct = totActivePlans > 0 ? (count / totActivePlans) * 100 : 25;
+        const color = colors[idx % colors.length];
+        
+        const endPercent = startPercent + pct;
+        donutGradientString += `${color} ${startPercent}% ${endPercent}%, `;
+        startPercent = endPercent;
+
+        const div = document.createElement("div");
+        div.style.display = "flex";
+        div.style.alignItems = "center";
+        div.style.gap = "4px";
+        div.innerHTML = `<span style="display:inline-block; width:10px; height:10px; border-radius:50%; background:${color};"></span> ${plan ? plan.name_ar : k}: ${pct.toFixed(0)}%`;
+        legendContainer.appendChild(div);
+      });
+      
+      donutGradientString = donutGradientString.slice(0, -2);
+      document.getElementById("stats-donut").style.background = `conic-gradient(${donutGradientString || 'var(--border) 0% 100%'})`;
+
+      // Subscriptions status neon bars
+      const statusChart = document.getElementById("stats-status-chart");
+      statusChart.innerHTML = "";
+      
+      let counts = { active: 0, expiring: 0, expired: 0, unpaid: 0 };
+      state.members.forEach(m => {
+        const status = getSubscriptionStatus(m.expiryDate);
+        counts[status]++;
+        if (m.payment_status === "unpaid" && status !== "expired") {
+          counts.unpaid++;
+        }
+      });
+      
+      const statusLabels = {
+        active: { name: "نشط وواصل", color: "var(--success)" },
+        expiring: { name: "قارب الانتهاء", color: "var(--warning)" },
+        expired: { name: "منتهي الاشتراك", color: "var(--danger)" },
+        unpaid: { name: "غير واصل (لم يدفع)", color: "var(--danger)" }
+      };
+
+      for (const k in counts) {
+        const val = counts[k];
+        const pct = state.members.length > 0 ? (val / state.members.length) * 100 : 0;
+        
+        const row = document.createElement("div");
+        row.className = "horiz-bar-row";
+        row.innerHTML = `
+          <div style="display:flex; justify-content:space-between; font-size:0.8rem; font-weight:700;">
+            <span>${statusLabels[k].name}</span>
+            <span class="font-data">${val} (${pct.toFixed(0)}%)</span>
+          </div>
+          <div class="horiz-bar-track">
+            <div class="horiz-bar-fill" style="width:${pct}%; background:${statusLabels[k].color};"></div>
+          </div>
+        `;
+        statusChart.appendChild(row);
+      }
+
+      // Horizontal/Vertical registrations bar chart
+      const regChart = document.getElementById("stats-registrations-bar-chart");
+      regChart.innerHTML = "";
+      
+      let monthLabels = [];
+      let monthCounts = {};
+      
+      for (let i = 5; i >= 0; i--) {
+        const d = new Date();
+        d.setMonth(d.getMonth() - i);
+        const mName = d.toLocaleDateString("en-US", { month: "short" });
+        monthLabels.push(mName);
+        monthCounts[mName] = 0;
+      }
+      
+      state.members.forEach(m => {
+        const joinMonth = new Date(m.startDate).toLocaleDateString("en-US", { month: "short" });
+        if (monthCounts[joinMonth] !== undefined) {
+          monthCounts[joinMonth]++;
+        }
+      });
+
+      let maxReg = 0;
+      monthLabels.forEach(m => {
+        if (monthCounts[m] > maxReg) maxReg = monthCounts[m];
+      });
+
+      monthLabels.forEach(m => {
+        const count = monthCounts[m];
+        const pctHeight = maxReg > 0 ? (count / maxReg) * 100 : 0;
+        
+        const wrap = document.createElement("div");
+        wrap.className = "chart-bar-wrapper";
+        wrap.innerHTML = `
+          <div class="chart-bar-fill" style="height:${pctHeight}%;">
+            <span class="chart-bar-val font-data">${count}</span>
+          </div>
+          <span class="chart-bar-label font-data">${m}</span>
+        `;
+        regChart.appendChild(wrap);
+      });
+    }
+
+    // ═══════════════════════════════
+    // 🔔 ADMIN VIEW F: ALERTS & NOTIFICATIONS
+    // ═══════════════════════════════
+    function renderNotificationsView() {
+      const container = document.getElementById("admin-notifications-container");
+      container.innerHTML = "";
+
+      const notifications = generateSystemAlerts();
+      if (notifications.length === 0) {
+        container.innerHTML = `<div style="text-align:center; padding:30px; color:var(--text-muted);">النظام يعمل بشكل ممتاز. لا توجد تنبيهات عاجلة حالياً.</div>`;
+        return;
+      }
+
+      notifications.forEach(n => {
+        const statusClass = n.type === "expired" ? "badge-danger" : "badge-warning";
+        const btnClass = n.type === "expired" ? "btn-danger" : "btn-primary";
+        
+        const item = document.createElement("div");
+        item.className = "glass-card";
+        item.style.display = "flex";
+        item.style.justify = "space-between";
+        item.style.alignItems = "center";
+        item.style.padding = "14px 20px";
+        item.innerHTML = `
+          <div>
+            <div style="display:flex; align-items:center; gap:8px; margin-bottom:4px;">
+              <span class="badge ${statusClass}">${n.type.toUpperCase()}</span>
+              <strong style="font-size:1rem;">${n.name}</strong>
+            </div>
+            <div style="font-size:0.8rem; color:var(--text-muted);">${n.msg}</div>
+          </div>
+          <button class="btn ${btnClass}" style="padding: 8px 14px; font-size: 0.8rem;" onclick="triggerWhatsAppRemind('${n.memberId}', '${n.type}')">
+            <i data-lucide="message-square"></i> واتساب
+          </button>
+        `;
+        container.appendChild(item);
+      });
+      lucide.createIcons();
+    }
+
+    function generateSystemAlerts() {
+      const role = sessionStorage.getItem("titan_admin_role");
+      const captainId = sessionStorage.getItem("titan_captain_id");
+      let membersList = state.members;
+      if (role === "captain") {
+        membersList = state.members.filter(m => m.trainerId === captainId);
+      }
+
+      const alerts = [];
+      membersList.forEach(m => {
+        const days = getDaysRemaining(m.expiryDate);
+        
+        if (days <= 0) {
+          alerts.push({
+            memberId: m.id,
+            name: m.name,
+            type: "expired",
+            msg: `انتهى اشتراك المشترك منذ ${Math.abs(days)} يوم. رقم الهاتف: ${m.phone}`
+          });
+        } else if (days === 7) {
+          alerts.push({
+            memberId: m.id,
+            name: m.name,
+            type: "7_days_left",
+            msg: `متبقي 7 أيام على انتهاء الاشتراك. رقم الهاتف: ${m.phone}`
+          });
+        } else if (days === 3) {
+          alerts.push({
+            memberId: m.id,
+            name: m.name,
+            type: "3_days_left",
+            msg: `تنبيه هام: متبقي 3 أيام فقط على انتهاء الاشتراك! رقم الهاتف: ${m.phone}`
+          });
+        } else if (m.payment_status === "unpaid") {
+          alerts.push({
+            memberId: m.id,
+            name: m.name,
+            type: "unpaid",
+            msg: `عضو نشط بالصالة لكنه لم يسدد الرسوم (غير واصل).`
+          });
+        }
+      });
+      return alerts;
+    }
+
+    function triggerWhatsAppRemind(memberId, type = "expiring") {
+      const m = state.members.find(x => x.id === memberId);
+      if (!m) return;
+
+      const phoneFormatted = convertPhoneFormat(m.phone);
+      const days = getDaysRemaining(m.expiryDate);
+
+      let msg = "";
+      if (type === "7_days_left") {
+        msg = `عزيزي ${m.name}،\nنود إعلامك بأنه متبقي 7 أيام على انتهاء اشتراكك في 🏋️ TITAN GYM.\nجدد اشتراكك الآن لتضمن استمرار تمرينك دون انقطاع! 💪`;
+      } else if (type === "3_days_left") {
+        msg = `عزيزي ${m.name}،\nتنبيه: متبقي 3 أيام فقط على انتهاء اشتراكك في 🏋️ TITAN GYM.\nيرجى التجديد قريباً لاستكمال تدريباتك. 🔥`;
+      } else if (type === "expired" || days <= 0) {
+        msg = `عزيزي ${m.name}،\nلقد انتهى اشتراكك في 🏋️ TITAN GYM.\nنحن بانتظارك للعودة ومواصلة تقدمك! عد وجدد اشتراكك اليوم. ⚡`;
+      } else if (type === "unpaid") {
+        msg = `عزيزي ${m.name}،\nيرجى تسديد رسوم اشتراكك في 🏋️ TITAN GYM.\nللاستفسار تواصل معنا.`;
+      } else {
+        msg = `عزيزي ${m.name}، \nاشتراكك في 🏋️ TITAN GYM ينتهي خلال ${days} أيام. \nجدد اشتراكك الآن واستمر في رحلتك! 💪`;
+      }
+
+      const encoded = encodeURIComponent(msg);
+      window.open(`https://wa.me/${phoneFormatted}?text=${encoded}`, "_blank");
+      showToast(state.lang === 'ar' ? "تم فتح واتساب للإرسال!" : "WhatsApp chat opened!", "success");
+    }
+
+    function convertPhoneFormat(phone) {
+      let raw = phone.trim().replace(/[^\d]/g, '');
+      if (raw.startsWith("0")) {
+        raw = "964" + raw.slice(1);
+      }
+      return raw;
+    }
+
+    function triggerBulkWhatsAppAlerts() {
+      const alerts = generateSystemAlerts();
+      if (alerts.length === 0) {
+        showToast("لا يوجد اشتراكات بحاجة للتذكير حالياً.", "warning");
+        return;
+      }
+      
+      let count = 0;
+      showToast(state.lang === 'ar' ? `بدء إرسال تذكيرات مجمعة لـ ${alerts.length} أعضاء...` : `Bulk sending to ${alerts.length} athletes...`, "success");
+      
+      const interval = setInterval(() => {
+        if (count >= alerts.length) {
+          clearInterval(interval);
+          showToast(state.lang === 'ar' ? "اكتمل إرسال جميع التنبيهات!" : "All alerts completed!", "success");
+        } else {
+          const item = alerts[count];
+          triggerWhatsAppRemind(item.memberId, item.type);
+          count++;
+        }
+      }, 1500);
+    }
+
+    // ═══════════════════════════════
+    // ⚙️ ADMIN VIEW G: SETTINGS
+    // ═══════════════════════════════
+    function renderSettingsView() {
+      document.getElementById("owner-name-input").value = state.ownerProfile.name;
+      document.getElementById("gym-phone-input").value = state.ownerProfile.phone;
+
+      const list = document.getElementById("trainers-settings-list");
+      list.innerHTML = "";
+
+      state.trainers.forEach(t => {
+        const count = state.members.filter(m => m.trainerId === t.id).length;
+        
+        const row = document.createElement("tr");
+        row.innerHTML = `
+          <td><b>${t.name}</b></td>
+          <td class="font-data">${t.phone}</td>
+          <td>${t.specialty}</td>
+          <td class="font-data" style="color: var(--primary); font-weight: 700;">${t.loginCode || '-'}</td>
+          <td class="font-data" style="font-weight:700;">${count}</td>
+          <td>
+            <div style="display:flex; gap:6px;">
+              <button class="btn btn-ghost" style="padding:4px 8px;" onclick="triggerEditTrainerModal('${t.id}')"><i data-lucide="edit" style="width:12px; height:12px;"></i></button>
+              <button class="btn btn-danger" style="padding:4px 8px;" onclick="executeDeleteTrainer('${t.id}')"><i data-lucide="trash-2" style="width:12px; height:12px;"></i></button>
+            </div>
+          </td>
+        `;
+        list.appendChild(row);
+      });
+      lucide.createIcons();
+    }
+
+    function executeChangePassword(e) {
+      e.preventDefault();
+      const current = document.getElementById("pass-current").value;
+      const newPass = document.getElementById("pass-new").value;
+      const confirmPass = document.getElementById("pass-confirm").value;
+
+      if (current !== state.adminPassword || newPass !== confirmPass) {
+        showToast(translations[state.lang].t_pass_mismatch, "danger");
+        return;
+      }
+
+      state.adminPassword = newPass;
+      state.ownerProfile.name = document.getElementById("owner-name-input").value;
+      state.ownerProfile.phone = document.getElementById("gym-phone-input").value;
+      saveState();
+
+      document.getElementById("pass-current").value = "";
+      document.getElementById("pass-new").value = "";
+      document.getElementById("pass-confirm").value = "";
+
+      showToast(translations[state.lang].t_success_update, "success");
+    }
+
+    function executeDatabaseReset() {
+      if (confirm(state.lang === 'ar' ? "تنبيه: سيتم مسح كافة التعديلات واستعادة البيانات الافتراضية للجيم! هل تريد المتابعة؟" : "Warning: This will restore state to initial seed values! Proceed?")) {
+        localStorage.removeItem("titan_gym_v3_state");
+        seedFreshData();
+        showToast(translations[state.lang].t_success_update, "success");
+        setTimeout(() => window.location.reload(), 1000);
+      }
+    }
+
+    // Trainer CRUD forms
+    function triggerAddTrainerModal() {
+      const body = `
+        <form onsubmit="executeAddTrainer(event)" style="display:flex; flex-direction:column; gap:12px;">
+          <div class="form-group">
+            <label class="form-label">الاسم الكامل للمدرب (الكابتن)</label>
+            <input type="text" class="form-input" id="trainer-add-name" required placeholder="مثال: كريم العبيدي">
+          </div>
+          <div class="form-group">
+            <label class="form-label">رقم الهاتف</label>
+            <input type="text" class="form-input" id="trainer-add-phone" required placeholder="077XXXXXXXX" style="font-family: var(--font-data);">
+          </div>
+          <div class="form-group">
+            <label class="form-label">التخصص الرياضي</label>
+            <input type="text" class="form-input" id="trainer-add-spec" required placeholder="كمال أجسام / فتنس / كروس فيت">
+          </div>
+          <div class="form-group">
+            <label class="form-label">رمز دخول الكابتن (الرقم السري)</label>
+            <input type="text" class="form-input" id="trainer-add-code" required placeholder="مثال: 1111" style="font-family: var(--font-data);">
+          </div>
+          <button type="submit" class="btn btn-primary" style="width:100%; margin-top:10px;">إضافة المدرب وحفظ السجل</button>
+        </form>
+      `;
+      showModal("إضافة مدرب جديد للجيم", body);
+    }
+
+    function executeAddTrainer(e) {
+      e.preventDefault();
+      const name = document.getElementById("trainer-add-name").value.trim();
+      const phone = document.getElementById("trainer-add-phone").value.trim();
+      const specialty = document.getElementById("trainer-add-spec").value.trim();
+      const loginCode = document.getElementById("trainer-add-code").value.trim();
+
+      state.trainers.push({
+        id: "tr_" + Date.now(),
+        name, phone, specialty, loginCode
+      });
+
+      saveState();
+      hideModal();
+      renderSettingsView();
+      showToast(translations[state.lang].t_success_add, "success");
+    }
+
+    function triggerEditTrainerModal(id) {
+      const t = state.trainers.find(x => x.id === id);
+      if (!t) return;
+
+      const body = `
+        <form onsubmit="executeEditTrainer(event, '${t.id}')" style="display:flex; flex-direction:column; gap:12px;">
+          <div class="form-group">
+            <label class="form-label">الاسم الكامل للمدرب (الكابتن)</label>
+            <input type="text" class="form-input" id="trainer-edit-name" value="${t.name}" required>
+          </div>
+          <div class="form-group">
+            <label class="form-label">رقم الهاتف</label>
+            <input type="text" class="form-input" id="trainer-edit-phone" value="${t.phone}" required style="font-family: var(--font-data);">
+          </div>
+          <div class="form-group">
+            <label class="form-label">التخصص الرياضي</label>
+            <input type="text" class="form-input" id="trainer-edit-spec" value="${t.specialty}" required>
+          </div>
+          <div class="form-group">
+            <label class="form-label">رمز دخول الكابتن (الرقم السري)</label>
+            <input type="text" class="form-input" id="trainer-edit-code" value="${t.loginCode || ''}" required style="font-family: var(--font-data);">
+          </div>
+          <button type="submit" class="btn btn-primary" style="width:100%; margin-top:10px;">حفظ تعديلات المدرب</button>
+        </form>
+      `;
+      showModal("تعديل بيانات المدرب", body);
+    }
+
+    function executeEditTrainer(e, id) {
+      e.preventDefault();
+      const t = state.trainers.find(x => x.id === id);
+      if (!t) return;
+
+      t.name = document.getElementById("trainer-edit-name").value.trim();
+      t.phone = document.getElementById("trainer-edit-phone").value.trim();
+      t.specialty = document.getElementById("trainer-edit-spec").value.trim();
+      t.loginCode = document.getElementById("trainer-edit-code").value.trim();
+
+      saveState();
+      hideModal();
+      renderSettingsView();
+      showToast(translations[state.lang].t_success_add, "success");
+    }
+
+    function executeDeleteTrainer(id) {
+      const isAssigned = state.members.some(m => m.trainerId === id);
+      if (isAssigned) {
+        showToast(translations[state.lang].t_err_trainer_delete, "danger");
+        return;
+      }
+
+      if (confirm("هل تريد حذف هذا المدرب؟")) {
+        state.trainers = state.trainers.filter(t => t.id !== id);
+        saveState();
+        renderSettingsView();
+        showToast(translations[state.lang].t_success_del, "danger");
+      }
+    }
+
+    // ═══════════════════════════════
+    // ⚙️ CALENDAR UTILITIES
+    // ═══════════════════════════════
+    function getTodayDateString() {
+      const now = new Date();
+      const y = now.getFullYear();
+      const m = String(now.getMonth() + 1).padStart(2, '0');
+      const d = String(now.getDate()).padStart(2, '0');
+      return `${y}-${m}-${d}`;
+    }
+
+    function getDaysRemaining(expiryDateStr) {
+      const start = new Date(getTodayDateString());
+      const end = new Date(expiryDateStr);
+      const diffTime = end - start;
+      const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+      return diffDays;
+    }
+
+    // warning <= 7 days
+    function getSubscriptionStatus(expiryDateStr) {
+      const d = getDaysRemaining(expiryDateStr);
+      if (d < 0) return "expired";
+      if (d <= 7) return "expiring";
+      return "active";
+    }
+
+    window.onload = initApp;
+  </script>
+</body>
+</html>
+

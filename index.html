@@ -1,0 +1,302 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>TITAN GYM — بوابة الأنظمة</title>
+  
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800&family=Orbitron:wght@700;900&display=swap" rel="stylesheet">
+  
+  <!-- Lucide Icons CDN -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+  
+  <style>
+    :root {
+      --bg: #050508;
+      --surface: #0e0e16;
+      --primary: #00f5ff; /* electric cyan */
+      --secondary: #7b2fff; /* neon purple */
+      --text: #ffffff;
+      --text-muted: #8888aa;
+      --border: rgba(255,255,255,0.08);
+      --font-display: 'Orbitron', sans-serif;
+      --font-arabic: 'Cairo', sans-serif;
+      --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      background-color: var(--bg);
+      color: var(--text);
+      font-family: var(--font-arabic);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      overflow-hidden: auto;
+      position: relative;
+    }
+
+    /* Background decorative glows */
+    .glow-bg {
+      position: absolute;
+      width: 400px;
+      height: 400px;
+      background: radial-gradient(circle, rgba(0, 245, 255, 0.1) 0%, rgba(123, 47, 255, 0.05) 50%, transparent 100%);
+      top: 10%;
+      left: 10%;
+      z-index: 1;
+      filter: blur(80px);
+      pointer-events: none;
+    }
+    .glow-bg-right {
+      position: absolute;
+      width: 500px;
+      height: 500px;
+      background: radial-gradient(circle, rgba(123, 47, 255, 0.12) 0%, rgba(0, 245, 255, 0.05) 50%, transparent 100%);
+      bottom: 10%;
+      right: 10%;
+      z-index: 1;
+      filter: blur(100px);
+      pointer-events: none;
+    }
+
+    .container {
+      z-index: 2;
+      width: 90%;
+      max-width: 900px;
+      text-align: center;
+      padding: 40px 20px;
+    }
+
+    .logo-container {
+      margin-bottom: 40px;
+      display: inline-block;
+      animation: float 4s ease-in-out infinite;
+    }
+
+    @keyframes float {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-10px); }
+    }
+
+    .logo-badge {
+      background: linear-gradient(135deg, var(--primary), var(--secondary));
+      padding: 2px;
+      border-radius: 50%;
+      display: inline-block;
+      box-shadow: 0 0 30px rgba(0, 245, 255, 0.3);
+    }
+
+    .logo-icon {
+      background: var(--bg);
+      width: 80px;
+      height: 80px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--primary);
+    }
+
+    h1 {
+      font-family: var(--font-display);
+      font-size: 3.5rem;
+      font-weight: 900;
+      letter-spacing: 2px;
+      background: linear-gradient(135deg, #ffffff 30%, var(--primary) 70%, var(--secondary) 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      margin-bottom: 10px;
+      text-transform: uppercase;
+    }
+
+    .subtitle {
+      font-size: 1.2rem;
+      color: var(--text-muted);
+      margin-bottom: 50px;
+      font-weight: 600;
+    }
+
+    .portal-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 30px;
+      margin-bottom: 40px;
+    }
+
+    @media (max-width: 600px) {
+      .portal-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .portal-card {
+      background: rgba(255, 255, 255, 0.02);
+      backdrop-filter: blur(15px);
+      -webkit-backdrop-filter: blur(15px);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      padding: 40px 30px;
+      text-decoration: none;
+      color: var(--text);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      transition: var(--transition);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .portal-card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: radial-gradient(circle at center, rgba(255,255,255,0.03) 0%, transparent 70%);
+      opacity: 0;
+      transition: var(--transition);
+    }
+
+    .portal-card:hover {
+      transform: translateY(-8px);
+      border-color: rgba(255,255,255,0.15);
+      background: rgba(255, 255, 255, 0.04);
+    }
+
+    .portal-card.admin:hover {
+      box-shadow: 0 15px 40px rgba(123, 47, 255, 0.15);
+      border-color: rgba(123, 47, 255, 0.4);
+    }
+
+    .portal-card.member:hover {
+      box-shadow: 0 15px 40px rgba(0, 245, 255, 0.15);
+      border-color: rgba(0, 245, 255, 0.4);
+    }
+
+    .portal-card:hover::before {
+      opacity: 1;
+    }
+
+    .icon-wrapper {
+      width: 70px;
+      height: 70px;
+      border-radius: 16px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 24px;
+      transition: var(--transition);
+    }
+
+    .admin .icon-wrapper {
+      background: rgba(123, 47, 255, 0.1);
+      color: var(--secondary);
+      border: 1px solid rgba(123, 47, 255, 0.2);
+    }
+
+    .member .icon-wrapper {
+      background: rgba(0, 245, 255, 0.1);
+      color: var(--primary);
+      border: 1px solid rgba(0, 245, 255, 0.2);
+    }
+
+    .portal-card:hover .icon-wrapper {
+      transform: scale(1.1) rotate(5deg);
+    }
+
+    .admin:hover .icon-wrapper {
+      background: var(--secondary);
+      color: white;
+      box-shadow: 0 0 20px rgba(123, 47, 255, 0.5);
+    }
+
+    .member:hover .icon-wrapper {
+      background: var(--primary);
+      color: #050508;
+      box-shadow: 0 0 20px rgba(0, 245, 255, 0.5);
+    }
+
+    .portal-title {
+      font-size: 1.6rem;
+      font-weight: 800;
+      margin-bottom: 12px;
+    }
+
+    .portal-desc {
+      font-size: 0.95rem;
+      color: var(--text-muted);
+      line-height: 1.6;
+    }
+
+    .footer {
+      margin-top: 40px;
+      font-size: 0.85rem;
+      color: var(--text-muted);
+      z-index: 2;
+    }
+  </style>
+</head>
+<body>
+  
+  <div class="glow-bg"></div>
+  <div class="glow-bg-right"></div>
+
+  <div class="container">
+    
+    <div class="logo-container">
+      <div class="logo-badge">
+        <div class="logo-icon">
+          <i data-lucide="dumbbell" style="width: 42px; height: 42px;"></i>
+        </div>
+      </div>
+    </div>
+
+    <h1>Titan Gym</h1>
+    <div class="subtitle">نظام الإدارة وبوابات المشتركين</div>
+
+    <div class="portal-grid">
+      
+      <!-- Admin Portal Link -->
+      <a href="titan-admin.html" class="portal-card admin">
+        <div class="icon-wrapper">
+          <i data-lucide="shield-check" style="width: 32px; height: 32px;"></i>
+        </div>
+        <div class="portal-title">لوحة الإدارة والكباتن</div>
+        <div class="portal-desc">تسجيل الدخول للمالك والمدربين، متابعة الاشتراكات، الحضور، الإحصائيات وإرسال إشعارات الواتساب.</div>
+      </a>
+
+      <!-- Athlete Portal Link -->
+      <a href="titan-member.html" class="portal-card member">
+        <div class="icon-wrapper">
+          <i data-lucide="user" style="width: 32px; height: 32px;"></i>
+        </div>
+        <div class="portal-title">بوابة المشتركين واللاعبين</div>
+        <div class="portal-desc">متابعة خطتك التدريبية والغذائية، حساب السعرات، تقييم التمارين اليومية والاطلاع على حالة اشتراكك.</div>
+      </a>
+
+    </div>
+
+    <div class="footer">
+      &copy; 2026 TITAN GYM. جميع الحقوق محفوظة لشركة تيتان.
+    </div>
+
+  </div>
+
+  <script>
+    lucide.createIcons();
+  </script>
+</body>
+</html>
