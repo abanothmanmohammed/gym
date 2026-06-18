@@ -694,14 +694,18 @@
       <p style="color: var(--primary); font-family: var(--font-display); font-size: 0.8rem; letter-spacing: 2px; margin-bottom: 25px;" id="login-sub-title">ADMIN CONTROL CENTER</p>
       
       <div class="login-tabs">
-        <a href="titan-member.html" class="login-tab-btn" id="tab-member-btn">دخول اللاعبين</a>
+        <a href="../member/" class="login-tab-btn" id="tab-member-btn">دخول اللاعبين</a>
         <span class="login-tab-btn active" id="tab-admin-btn">إدارة الجيم</span>
       </div>
 
-      <!-- Admin Login Form (Password only) -->
+      <!-- Admin Login Form (Email & Password) -->
       <form id="admin-login-form" onsubmit="executeAdminLogin(event)">
         <div class="form-group">
-          <label class="form-label" id="lbl-password-login">كلمة مرور النظام</label>
+          <label class="form-label" id="lbl-email-login">البريد الإلكتروني</label>
+          <input type="email" class="form-input" id="login-email" placeholder="admin@titan.com" required style="text-align: center; font-family: var(--font-data);">
+        </div>
+        <div class="form-group">
+          <label class="form-label" id="lbl-password-login">كلمة المرور</label>
           <input type="password" class="form-input" id="login-password" placeholder="••••••••" required style="text-align: center;">
         </div>
         <button type="submit" class="btn btn-primary" style="width: 100%; margin-top: 10px;">
@@ -1571,34 +1575,48 @@
     // ═══════════════════════════════
     // 🚪 AUTHENTICATION PROCESSES
     // ═══════════════════════════════
-    function executeAdminLogin(e) {
+    async function executeAdminLogin(e) {
       e.preventDefault();
+      const email = document.getElementById("login-email").value.trim().toLowerCase();
       const pass = document.getElementById("login-password").value;
       
-      if (pass === state.adminPassword) {
+      try {
+        const { data, error } = await supabaseClient
+          .from('gym_users')
+          .select('*')
+          .eq('email', email)
+          .single();
+        
+        if (error || !data) {
+          showToast(state.lang === 'ar' ? "البريد الإلكتروني غير مسجل!" : "Email not registered!", "danger");
+          return;
+        }
+
+        if (data.password !== pass) {
+          showToast(translations[state.lang].t_login_err_pass, "danger");
+          return;
+        }
+
+        // Login success
         state.currentUserType = "admin";
         sessionStorage.setItem("titan_admin_session", "session_" + Date.now());
-        sessionStorage.setItem("titan_admin_role", "owner");
+        sessionStorage.setItem("titan_admin_role", data.role); // 'owner' or 'captain'
         
+        if (data.role === 'captain' && data.associated_id) {
+          sessionStorage.setItem("titan_captain_id", data.associated_id);
+        }
+
         window.location.hash = `#admin/dashboard`;
-        showToast(state.lang === 'ar' ? "تم تسجيل الدخول كمشرف للنظام 🛡️" : "Logged in as Administrator 🛡️", "success");
-        return;
-      }
-      
-      // Check if it matches any trainer's loginCode
-      const trainer = state.trainers.find(t => t.loginCode === pass);
-      if (trainer) {
-        state.currentUserType = "admin";
-        sessionStorage.setItem("titan_admin_session", "session_" + Date.now());
-        sessionStorage.setItem("titan_admin_role", "captain");
-        sessionStorage.setItem("titan_captain_id", trainer.id);
         
-        window.location.hash = `#admin/dashboard`;
-        showToast(state.lang === 'ar' ? `تم تسجيل الدخول ككابتن: ${trainer.name} 🎽` : `Logged in as Captain: ${trainer.name} 🎽`, "success");
-        return;
+        const welcomeMsg = state.lang === 'ar' 
+          ? (data.role === 'owner' ? "تم تسجيل الدخول كمشرف للنظام 🛡️" : `تم تسجيل الدخول ككابتن 🎽`)
+          : (data.role === 'owner' ? "Logged in as Administrator 🛡️" : "Logged in as Captain 🎽");
+        
+        showToast(welcomeMsg, "success");
+      } catch (err) {
+        console.error("Auth error:", err);
+        showToast(state.lang === 'ar' ? "حدث خطأ أثناء الاتصال بقاعدة البيانات" : "Database connection error", "danger");
       }
-      
-      showToast(translations[state.lang].t_login_err_pass, "danger");
     }
 
     function executeLogout() {

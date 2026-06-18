@@ -488,14 +488,18 @@
       
       <div class="login-tabs">
         <span class="login-tab-btn active" id="tab-member-btn">دخول اللاعبين</span>
-        <a href="titan-admin.html" class="login-tab-btn" id="tab-admin-btn">إدارة الجيم</a>
+        <a href="../admin/" class="login-tab-btn" id="tab-admin-btn">إدارة الجيم</a>
       </div>
 
-      <!-- Member Login Form (Phone) -->
+      <!-- Member Login Form (Email & Password) -->
       <form id="member-login-form" onsubmit="executeMemberLogin(event)">
         <div class="form-group">
-          <label class="form-label" id="lbl-phone-login">رقم الهاتف المسجل (07XXXXXXXXX)</label>
-          <input type="text" class="form-input" id="login-phone" placeholder="07701234561" required style="font-family: var(--font-data); text-align: center;">
+          <label class="form-label" id="lbl-email-login">البريد الإلكتروني</label>
+          <input type="email" class="form-input" id="login-email" placeholder="member@titan.com" required style="text-align: center; font-family: var(--font-data);">
+        </div>
+        <div class="form-group">
+          <label class="form-label" id="lbl-password-login">كلمة المرور</label>
+          <input type="password" class="form-input" id="login-password" placeholder="••••••••" required style="text-align: center;">
         </div>
         <button type="submit" class="btn btn-primary" style="width: 100%; margin-top: 10px;">
           <i data-lucide="log-in"></i>
@@ -1291,22 +1295,49 @@
     // ═══════════════════════════════
     // 🚪 AUTHENTICATION PROCESSES
     // ═══════════════════════════════
-    function executeMemberLogin(e) {
+    async function executeMemberLogin(e) {
       e.preventDefault();
-      const phone = document.getElementById("login-phone").value.trim();
+      const email = document.getElementById("login-email").value.trim().toLowerCase();
+      const pass = document.getElementById("login-password").value;
       
-      const member = state.members.find(m => m.phone === phone);
-      if (!member) {
-        showToast(translations[state.lang].t_login_err_phone, "danger");
-        return;
+      try {
+        const { data, error } = await supabaseClient
+          .from('gym_users')
+          .select('*')
+          .eq('email', email)
+          .single();
+        
+        if (error || !data) {
+          showToast(state.lang === 'ar' ? "البريد الإلكتروني غير مسجل!" : "Email not registered!", "danger");
+          return;
+        }
+
+        if (data.password !== pass) {
+          showToast(state.lang === 'ar' ? "كلمة المرور خاطئة!" : "Incorrect password!", "danger");
+          return;
+        }
+
+        if (data.role !== 'member' || !data.associated_id) {
+          showToast(state.lang === 'ar' ? "هذا الحساب ليس للاعب!" : "This account is not a member account!", "danger");
+          return;
+        }
+
+        const member = state.members.find(m => m.id === data.associated_id);
+        if (!member) {
+          showToast(state.lang === 'ar' ? "لم يتم العثور على بيانات اللاعب!" : "Member data not found!", "danger");
+          return;
+        }
+
+        state.currentUserType = "member";
+        state.currentMemberId = member.id;
+        sessionStorage.setItem("titan_member_session", "session_" + Date.now());
+        
+        window.location.hash = `#member`;
+        showToast(state.lang === 'ar' ? `مرحباً بك مجدداً يا ${member.name} 💪` : `Welcome back, ${member.name} 💪`, "success");
+      } catch (err) {
+        console.error("Member Auth error:", err);
+        showToast(state.lang === 'ar' ? "حدث خطأ أثناء الاتصال بقاعدة البيانات" : "Database connection error", "danger");
       }
-      
-      state.currentUserType = "member";
-      state.currentMemberId = member.id;
-      sessionStorage.setItem("titan_member_session", "session_" + Date.now());
-      
-      window.location.hash = `#member`;
-      showToast(state.lang === 'ar' ? `مرحباً بك مجدداً يا ${member.name} 💪` : `Welcome back, ${member.name} 💪`, "success");
     }
 
     // ═══════════════════════════════
