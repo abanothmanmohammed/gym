@@ -693,26 +693,18 @@
       <h1 style="font-family: var(--font-display); font-size: 2.2rem; font-weight: 900; color: #fff; margin-bottom: 5px;">TITAN GYM</h1>
       <p style="color: var(--primary); font-family: var(--font-display); font-size: 0.8rem; letter-spacing: 2px; margin-bottom: 25px;" id="login-sub-title">ADMIN CONTROL CENTER</p>
       
-      <div class="login-tabs">
-        <a href="../member/" class="login-tab-btn" id="tab-member-btn">دخول اللاعبين</a>
-        <span class="login-tab-btn active" id="tab-admin-btn">إدارة الجيم</span>
-      </div>
 
-      <!-- Admin Login Form (Email & Password) -->
-      <form id="admin-login-form" onsubmit="executeAdminLogin(event)">
-        <div class="form-group">
-          <label class="form-label" id="lbl-email-login">البريد الإلكتروني</label>
-          <input type="email" class="form-input" id="login-email" placeholder="admin@titan.com" required style="text-align: center; font-family: var(--font-data);">
-        </div>
-        <div class="form-group">
-          <label class="form-label" id="lbl-password-login">كلمة المرور</label>
-          <input type="password" class="form-input" id="login-password" placeholder="••••••••" required style="text-align: center;">
-        </div>
-        <button type="submit" class="btn btn-primary" style="width: 100%; margin-top: 10px;">
-          <i data-lucide="shield-check"></i>
-          <span id="btn-login-admin">دخول المشرف</span>
-        </button>
-      </form>
+
+      <!-- Google Sign-In Button (No password field required) -->
+      <button onclick="executeGoogleLogin()" class="btn btn-primary" style="width: 100%; margin-top: 15px; background: #fff; color: #000; border: 1px solid #ddd; font-weight: 700; transition: var(--transition);">
+        <svg style="width: 18px; height: 18px; margin-left: 8px; vertical-align: middle;" viewBox="0 0 24 24">
+          <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
+          <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
+          <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z"/>
+          <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/>
+        </svg>
+        <span id="btn-login-google">تسجيل الدخول باستخدام Google</span>
+      </button>
     </div>
   </main>
 
@@ -962,8 +954,8 @@
         <div class="grid-2">
           <!-- Owner Profile Section -->
           <div class="glass-card">
-            <h3 style="margin-bottom: 15px;" id="title-owner-profile">ملف المالك وتغيير كلمة المرور</h3>
-            <form onsubmit="executeChangePassword(event)">
+            <h3 style="margin-bottom: 15px;" id="title-owner-profile">ملف المالك وحساب الدخول</h3>
+            <form onsubmit="executeSaveSettings(event)">
               <div class="form-group">
                 <label class="form-label" id="lbl-owner-name">اسم المالك</label>
                 <input type="text" class="form-input" id="owner-name-input" value="تيتان جيم أدمن">
@@ -972,17 +964,9 @@
                 <label class="form-label" id="lbl-gym-phone">رقم هاتف الجيم</label>
                 <input type="text" class="form-input" id="gym-phone-input" value="07701234567" style="font-family: var(--font-data);">
               </div>
-              <div class="form-group">
-                <label class="form-label" id="lbl-curr-pass">كلمة المرور الحالية</label>
-                <input type="password" class="form-input" id="pass-current" required>
-              </div>
-              <div class="form-group">
-                <label class="form-label" id="lbl-new-pass">كلمة المرور الجديدة</label>
-                <input type="password" class="form-input" id="pass-new" required>
-              </div>
-              <div class="form-group">
-                <label class="form-label" id="lbl-confirm-pass">تأكيد كلمة المرور الجديدة</label>
-                <input type="password" class="form-input" id="pass-confirm" required>
+              <div class="form-group" style="margin-top: 15px; padding: 12px; background: rgba(0,245,255,0.05); border: 1px dashed var(--primary); border-radius: 6px;">
+                <label class="form-label" style="color: var(--primary); font-weight: 700;">حساب Google المرتبط</label>
+                <div id="connected-google-email" style="font-family: var(--font-data); font-size: 0.95rem; margin-top: 4px; color: #fff;">-</div>
               </div>
               <div style="display: flex; gap: 10px; justify-content: flex-end; margin-top: 15px;">
                 <button type="button" class="btn btn-ghost" onclick="executeDatabaseReset()" id="btn-reset-db">إعادة تعيين البيانات</button>
@@ -1028,6 +1012,59 @@
     const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InplcXRpcGtvYm94cHFqam1xaGpoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODE3NTQ3MjgsImV4cCI6MjA5NzMzMDcyOH0.EVkIY91wtbfVZbSjul0RyMdHINpexoHn8xJxvHGKLno";
     const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
+    // Listen for Auth changes (redirects, login, logout)
+    supabaseClient.auth.onAuthStateChange(async (event, session) => {
+      if ((event === 'SIGNED_IN' || event === 'INITIAL_SESSION') && session && session.user) {
+        const email = session.user.email;
+        
+        let { data: userRecord } = await supabaseClient
+          .from('gym_users')
+          .select('*')
+          .eq('email', email)
+          .eq('role', 'owner')
+          .maybeSingle();
+
+        if (!userRecord) {
+          // Check if any gmail owners exist. If not, auto-promote first gmail login.
+          const { data: otherOwners } = await supabaseClient
+            .from('gym_users')
+            .select('*')
+            .eq('role', 'owner')
+            .neq('email', 'admin@titan.com');
+
+          if (!otherOwners || otherOwners.length === 0) {
+            const { error: insertErr } = await supabaseClient
+              .from('gym_users')
+              .insert({ email: email, role: 'owner' });
+
+            if (!insertErr) {
+              userRecord = { email, role: 'owner' };
+            }
+          }
+        }
+
+        if (userRecord) {
+          state.currentUserType = "admin";
+          sessionStorage.setItem("titan_admin_session", "session_" + Date.now());
+          sessionStorage.setItem("titan_admin_role", "owner");
+          sessionStorage.setItem("titan_admin_email", email);
+          
+          if (window.location.hash === "#login" || !window.location.hash) {
+            window.location.hash = "#admin/dashboard";
+          }
+          if (typeof router === 'function') router();
+        } else {
+          // Logged in with google but not owner!
+          await supabaseClient.auth.signOut();
+          sessionStorage.clear();
+          state.currentUserType = null;
+          alert(state.lang === 'ar' ? "هذا الحساب غير مسجل كمالك للنظام." : "This Google account is not registered as owner.");
+          window.location.hash = "#login";
+          if (typeof router === 'function') router();
+        }
+      }
+    });
+
     // ═══════════════════════════════
     // TRANSLATIONS DICTIONARY
     // ═══════════════════════════════
@@ -1072,7 +1109,7 @@
         title_substatus: "Subscriptions Status Breakdown",
         title_newmems: "Monthly Registrations",
         title_settings: "Global Systems Settings",
-        title_profile: "Owner Profile & Password",
+        title_profile: "Owner Profile & Sign-In",
         lbl_owner: "Owner Name",
         lbl_gymphone: "Gym Phone Reference",
         lbl_currpass: "Current Password",
@@ -1141,7 +1178,7 @@
         title_substatus: "حالة الاشتراكات",
         title_newmems: "الأعضاء الجدد شهرياً",
         title_settings: "الإعدادات العامة للأنظمة",
-        title_profile: "ملف المالك وتغيير كلمة المرور",
+        title_profile: "ملف المالك وحساب الدخول",
         lbl_owner: "اسم المالك",
         lbl_gymphone: "رقم هاتف الجيم",
         lbl_currpass: "كلمة المرور الحالية",

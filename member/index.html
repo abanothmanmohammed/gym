@@ -486,26 +486,38 @@
       <h1 style="font-family: var(--font-display); font-size: 2.2rem; font-weight: 900; color: #fff; margin-bottom: 5px;">TITAN GYM</h1>
       <p style="color: var(--primary); font-family: var(--font-display); font-size: 0.8rem; letter-spacing: 2px; margin-bottom: 25px;" id="login-sub-title">ATHLETE ACCESS PORTAL</p>
       
-      <div class="login-tabs">
-        <span class="login-tab-btn active" id="tab-member-btn">دخول اللاعبين</span>
-        <a href="../admin/" class="login-tab-btn" id="tab-admin-btn">إدارة الجيم</a>
-      </div>
+      <!-- Member Login Container -->
+      <div id="login-container" style="width: 100%;">
+        <!-- Phase 1: Phone Input -->
+        <form id="member-phone-form" onsubmit="requestOTP(event)">
+          <div class="form-group">
+            <label class="form-label" id="lbl-phone-login">رقم الهاتف المسجل (07XXXXXXXXX)</label>
+            <input type="text" class="form-input" id="login-phone" placeholder="07701234561" required style="font-family: var(--font-data); text-align: center;">
+          </div>
+          <button type="submit" class="btn btn-primary" style="width: 100%; margin-top: 10px;">
+            <i data-lucide="send"></i>
+            <span id="btn-send-otp">إرسال رمز التحقق</span>
+          </button>
+        </form>
 
-      <!-- Member Login Form (Email & Password) -->
-      <form id="member-login-form" onsubmit="executeMemberLogin(event)">
-        <div class="form-group">
-          <label class="form-label" id="lbl-email-login">البريد الإلكتروني</label>
-          <input type="email" class="form-input" id="login-email" placeholder="member@titan.com" required style="text-align: center; font-family: var(--font-data);">
-        </div>
-        <div class="form-group">
-          <label class="form-label" id="lbl-password-login">كلمة المرور</label>
-          <input type="password" class="form-input" id="login-password" placeholder="••••••••" required style="text-align: center;">
-        </div>
-        <button type="submit" class="btn btn-primary" style="width: 100%; margin-top: 10px;">
-          <i data-lucide="log-in"></i>
-          <span id="btn-login-member">تسجيل دخول</span>
-        </button>
-      </form>
+        <!-- Phase 2: OTP Input (Hidden by default) -->
+        <form id="member-otp-form" onsubmit="verifyOTP(event)" style="display: none; margin-top: 15px;">
+          <div style="text-align: center; margin-bottom: 15px; font-size: 0.9rem; color: var(--primary); font-weight: 600;">
+            تم إرسال رمز تحقق مؤقت إلى رقم هاتفك.
+          </div>
+          <div class="form-group">
+            <label class="form-label" id="lbl-otp-login">أدخل رمز التحقق (4 أرقام)</label>
+            <input type="text" class="form-input" id="login-otp" placeholder="••••" maxlength="4" required style="font-family: var(--font-data); text-align: center; font-size: 1.5rem; letter-spacing: 8px;">
+          </div>
+          <button type="submit" class="btn btn-success" style="width: 100%; margin-top: 10px; font-weight: 700;">
+            <i data-lucide="shield-check"></i>
+            <span id="btn-verify-otp">تأكيد الرمز والدخول</span>
+          </button>
+          <button type="button" class="btn btn-ghost" onclick="resetLoginPhase()" style="width: 100%; margin-top: 8px; font-size: 0.8rem;">
+            تغيير رقم الهاتف
+          </button>
+        </form>
+      </div>
     </div>
   </main>
 
@@ -1172,10 +1184,9 @@
       const dict = translations[state.lang];
       
       setElementText("login-sub-title", dict.login_sub);
-      setElementText("tab-member-btn", "دخول اللاعبين");
-      setElementText("tab-admin-btn", "إدارة الجيم");
-      setElementText("lbl-phone-login", dict.lbl_ph);
-      setElementText("btn-login-member", dict.btn_log);
+      setElementText("btn-send-otp", state.lang === 'ar' ? "إرسال رمز التحقق" : "Send Verification Code");
+      setElementText("lbl-otp-login", state.lang === 'ar' ? "أدخل رمز التحقق (4 أرقام)" : "Enter OTP Code (4 digits)");
+      setElementText("btn-verify-otp", state.lang === 'ar' ? "تأكيد الرمز والدخول" : "Verify & Login");
 
       // Member portal labels
       setElementText("lbl-greeting", dict.lbl_greet);
@@ -1292,52 +1303,69 @@
       }
     }
 
-    // ═══════════════════════════════
-    // 🚪 AUTHENTICATION PROCESSES
-    // ═══════════════════════════════
-    async function executeMemberLogin(e) {
+    window.tempOTP = null;
+    window.tempPhone = null;
+
+    function requestOTP(e) {
       e.preventDefault();
-      const email = document.getElementById("login-email").value.trim().toLowerCase();
-      const pass = document.getElementById("login-password").value;
+      const phone = document.getElementById("login-phone").value.trim();
       
-      try {
-        const { data, error } = await supabaseClient
-          .from('gym_users')
-          .select('*')
-          .eq('email', email)
-          .single();
-        
-        if (error || !data) {
-          showToast(state.lang === 'ar' ? "البريد الإلكتروني غير مسجل!" : "Email not registered!", "danger");
-          return;
-        }
-
-        if (data.password !== pass) {
-          showToast(state.lang === 'ar' ? "كلمة المرور خاطئة!" : "Incorrect password!", "danger");
-          return;
-        }
-
-        if (data.role !== 'member' || !data.associated_id) {
-          showToast(state.lang === 'ar' ? "هذا الحساب ليس للاعب!" : "This account is not a member account!", "danger");
-          return;
-        }
-
-        const member = state.members.find(m => m.id === data.associated_id);
-        if (!member) {
-          showToast(state.lang === 'ar' ? "لم يتم العثور على بيانات اللاعب!" : "Member data not found!", "danger");
-          return;
-        }
-
-        state.currentUserType = "member";
-        state.currentMemberId = member.id;
-        sessionStorage.setItem("titan_member_session", "session_" + Date.now());
-        
-        window.location.hash = `#member`;
-        showToast(state.lang === 'ar' ? `مرحباً بك مجدداً يا ${member.name} 💪` : `Welcome back, ${member.name} 💪`, "success");
-      } catch (err) {
-        console.error("Member Auth error:", err);
-        showToast(state.lang === 'ar' ? "حدث خطأ أثناء الاتصال بقاعدة البيانات" : "Database connection error", "danger");
+      const phoneRegex = /^07[7895]\d{8}$/;
+      if (!phoneRegex.test(phone)) {
+        showToast(state.lang === 'ar' ? "رقم الهاتف غير صالح! يجب أن يتكون من 11 رقماً ويبدأ بـ 07" : "Invalid phone number format!", "danger");
+        return;
       }
+
+      const member = state.members.find(m => m.phone === phone);
+      if (!member) {
+        showToast(translations[state.lang].t_login_err_phone, "danger");
+        return;
+      }
+
+      const otp = Math.floor(1000 + Math.random() * 9000).toString();
+      window.tempOTP = otp;
+      window.tempPhone = phone;
+
+      showToast(state.lang === 'ar' ? `[تجريبي] رمز التحقق الخاص بك هو: ${otp}` : `[Demo] Your OTP code is: ${otp}`, "warning");
+
+      document.getElementById("member-phone-form").style.display = "none";
+      document.getElementById("member-otp-form").style.display = "block";
+      document.getElementById("login-otp").value = "";
+      document.getElementById("login-otp").focus();
+    }
+
+    function verifyOTP(e) {
+      e.preventDefault();
+      const otpInput = document.getElementById("login-otp").value.trim();
+
+      if (otpInput !== window.tempOTP) {
+        showToast(state.lang === 'ar' ? "رمز التحقق غير صحيح! حاول مجدداً." : "Invalid OTP! Try again.", "danger");
+        return;
+      }
+
+      const member = state.members.find(m => m.phone === window.tempPhone);
+      if (!member) {
+        showToast(translations[state.lang].t_login_err_phone, "danger");
+        return;
+      }
+
+      state.currentUserType = "member";
+      state.currentMemberId = member.id;
+      sessionStorage.setItem("titan_member_session", "session_" + Date.now());
+      
+      window.tempOTP = null;
+      window.tempPhone = null;
+
+      window.location.hash = `#member`;
+      showToast(state.lang === 'ar' ? `مرحباً بك مجدداً يا ${member.name} 💪` : `Welcome back, ${member.name} 💪`, "success");
+    }
+
+    function resetLoginPhase() {
+      window.tempOTP = null;
+      window.tempPhone = null;
+      document.getElementById("member-phone-form").style.display = "block";
+      document.getElementById("member-otp-form").style.display = "none";
+      document.getElementById("login-phone").value = "";
     }
 
     // ═══════════════════════════════
