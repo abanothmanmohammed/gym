@@ -1612,53 +1612,25 @@
     // ═══════════════════════════════
     // 🚪 AUTHENTICATION PROCESSES
     // ═══════════════════════════════
-    async function executeAdminLogin(e) {
-      e.preventDefault();
-      const email = document.getElementById("login-email").value.trim().toLowerCase();
-      const pass = document.getElementById("login-password").value;
-      
+    async function executeGoogleLogin() {
       try {
-        const { data, error } = await supabaseClient
-          .from('gym_users')
-          .select('*')
-          .eq('email', email)
-          .single();
-        
-        if (error || !data) {
-          showToast(state.lang === 'ar' ? "البريد الإلكتروني غير مسجل!" : "Email not registered!", "danger");
-          return;
-        }
-
-        if (data.password !== pass) {
-          showToast(translations[state.lang].t_login_err_pass, "danger");
-          return;
-        }
-
-        // Login success
-        state.currentUserType = "admin";
-        sessionStorage.setItem("titan_admin_session", "session_" + Date.now());
-        sessionStorage.setItem("titan_admin_role", data.role); // 'owner' or 'captain'
-        
-        if (data.role === 'captain' && data.associated_id) {
-          sessionStorage.setItem("titan_captain_id", data.associated_id);
-        }
-
-        window.location.hash = `#admin/dashboard`;
-        
-        const welcomeMsg = state.lang === 'ar' 
-          ? (data.role === 'owner' ? "تم تسجيل الدخول كمشرف للنظام 🛡️" : `تم تسجيل الدخول ككابتن 🎽`)
-          : (data.role === 'owner' ? "Logged in as Administrator 🛡️" : "Logged in as Captain 🎽");
-        
-        showToast(welcomeMsg, "success");
+        const { error } = await supabaseClient.auth.signInWithOAuth({
+          provider: 'google',
+          options: {
+            redirectTo: window.location.origin + window.location.pathname
+          }
+        });
+        if (error) throw error;
       } catch (err) {
-        console.error("Auth error:", err);
-        showToast(state.lang === 'ar' ? "حدث خطأ أثناء الاتصال بقاعدة البيانات" : "Database connection error", "danger");
+        console.error("OAuth error:", err);
+        showToast(state.lang === 'ar' ? "فشل الاتصال بـ Google" : "Google connection failed", "danger");
       }
     }
 
-    function executeLogout() {
+    async function executeLogout() {
       state.currentUserType = null;
       sessionStorage.clear();
+      await supabaseClient.auth.signOut();
       window.location.hash = "#login";
     }
 
