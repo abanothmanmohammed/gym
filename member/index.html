@@ -437,8 +437,153 @@
       grid-template-columns: 1fr 1fr;
       gap: 15px;
     }
-    @media (max-width: 600px) {
-      .grid-2 { grid-template-columns: 1fr; }
+    /* ===================================
+       📱 RESPONSIVE — MOBILE FIRST CSS
+       =================================== */
+
+    /* Tablet & Mobile (≤768px) */
+    @media (max-width: 768px) {
+
+      /* Member portal: proper width and padding */
+      #member-view {
+        width: 100%;
+        padding: 0 12px 100px; /* extra bottom for nav bar */
+      }
+
+      /* Portal header smaller */
+      .member-portal-header {
+        padding: 16px 0 12px;
+        flex-wrap: wrap;
+        gap: 8px;
+      }
+
+      /* Bottom nav: larger tap targets */
+      .member-bottom-nav {
+        height: 65px;
+        padding: 0 4px;
+      }
+      .member-nav-btn {
+        font-size: 0.65rem;
+        gap: 3px;
+        padding: 4px 2px;
+      }
+      .member-nav-btn svg {
+        width: 20px;
+        height: 20px;
+      }
+
+      /* Glass cards: compact */
+      .glass-card {
+        padding: 14px;
+      }
+
+      /* Tables horizontal scroll */
+      .table-container {
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+      }
+      .data-table th,
+      .data-table td {
+        padding: 10px 10px;
+        font-size: 0.82rem;
+        white-space: nowrap;
+      }
+
+      /* Modal: bottom sheet on mobile */
+      .modal-content {
+        max-width: 100%;
+        max-height: 95vh;
+        border-radius: 16px 16px 0 0;
+      }
+      .modal-overlay {
+        align-items: flex-end;
+        padding: 0;
+      }
+
+      /* Toast full width */
+      .toast-container {
+        left: 10px;
+        right: 10px;
+        bottom: 80px; /* above bottom nav */
+        max-width: none;
+        width: auto;
+      }
+      html[dir="ltr"] .toast-container {
+        left: 10px;
+        right: 10px;
+      }
+
+      /* Grid 2 stays 2-col on tablet */
+      .grid-2 {
+        grid-template-columns: 1fr 1fr;
+      }
+
+      /* Login box */
+      .login-box {
+        width: 95%;
+        padding: 25px 18px;
+      }
+    }
+
+    /* Small phones (≤480px) */
+    @media (max-width: 480px) {
+
+      /* Full width member view */
+      #member-view {
+        width: 100%;
+        padding: 0 10px 100px;
+      }
+
+      /* Grid: single column */
+      .grid-2 {
+        grid-template-columns: 1fr !important;
+      }
+
+      /* Compact glass card */
+      .glass-card {
+        padding: 12px;
+        border-radius: 10px;
+      }
+
+      /* Buttons smaller */
+      .btn {
+        padding: 8px 14px;
+        font-size: 0.82rem;
+      }
+
+      /* Headings */
+      h2 { font-size: 1.1rem; }
+      h3 { font-size: 0.95rem; }
+
+      /* Tables: even smaller text */
+      .data-table th,
+      .data-table td {
+        padding: 8px 8px;
+        font-size: 0.78rem;
+      }
+
+      /* Login */
+      .login-box {
+        width: 98%;
+        padding: 20px 14px;
+      }
+
+      /* Bottom nav: tighter */
+      .member-bottom-nav {
+        height: 60px;
+      }
+      .member-nav-btn span {
+        display: none; /* hide text labels, show icons only */
+      }
+      .member-nav-btn svg {
+        width: 22px;
+        height: 22px;
+      }
+
+      /* Modal full-screen feel */
+      .modal-content {
+        border-radius: 14px 14px 0 0;
+      }
     }
 
     .photo-preview-circle {

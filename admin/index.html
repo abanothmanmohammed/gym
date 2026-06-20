@@ -634,23 +634,186 @@
       }
     }
 
-    /* Responsive */
+    /* ===================================
+       📱 RESPONSIVE — MOBILE FIRST CSS
+       =================================== */
+
+    /* Tablet & Mobile (≤768px) */
     @media (max-width: 768px) {
+
+      /* Sidebar slides off-screen, toggled via JS */
       .admin-sidebar {
         transform: translateX(260px);
+        z-index: 300;
+        box-shadow: none;
       }
       html[dir="ltr"] .admin-sidebar {
         transform: translateX(-260px);
       }
       .admin-sidebar.active {
         transform: translateX(0);
+        box-shadow: 0 0 40px rgba(0,0,0,0.8);
       }
+
+      /* Sidebar backdrop overlay when open */
+      .sidebar-backdrop {
+        display: none;
+        position: fixed;
+        inset: 0;
+        background: rgba(0,0,0,0.6);
+        z-index: 299;
+        backdrop-filter: blur(2px);
+      }
+      .sidebar-backdrop.active { display: block; }
+
+      /* Main content fills full width */
       .admin-main {
         margin-right: 0 !important;
         margin-left: 0 !important;
+        padding: 16px 14px;
+        padding-top: 0;
       }
+
+      /* Mobile header bar shown */
       .admin-mob-header {
         display: flex;
+        position: sticky;
+        top: 0;
+        z-index: 200;
+      }
+
+      /* Stats grid: 2 columns on tablet */
+      .stats-summary {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 12px;
+      }
+
+      /* Section headers flex wrap */
+      .section-header {
+        flex-wrap: wrap;
+        gap: 10px;
+      }
+
+      /* Reduce glass-card padding */
+      .glass-card {
+        padding: 14px;
+      }
+
+      /* Tables: allow horizontal scroll on small screens */
+      .table-container {
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+      }
+      .data-table th,
+      .data-table td {
+        padding: 10px 12px;
+        font-size: 0.82rem;
+        white-space: nowrap;
+      }
+
+      /* Modal: full-width on mobile */
+      .modal-content {
+        max-width: 100%;
+        max-height: 95vh;
+        border-radius: 16px 16px 0 0;
+      }
+      .modal-overlay {
+        align-items: flex-end;
+        padding: 0;
+      }
+
+      /* Toast container: full width, proper spacing */
+      .toast-container {
+        left: 10px;
+        right: 10px;
+        bottom: 10px;
+        max-width: none;
+        width: auto;
+      }
+      html[dir="ltr"] .toast-container {
+        left: 10px;
+        right: 10px;
+      }
+
+      /* Chart bars smaller gaps */
+      .chart-box {
+        gap: 8px;
+        padding: 12px 6px;
+        min-height: 180px;
+      }
+      .chart-bar-fill { max-width: 32px; }
+      .chart-bar-label { font-size: 0.65rem; }
+
+      /* Login box fits phone */
+      .login-box {
+        width: 95%;
+        padding: 25px 18px;
+      }
+    }
+
+    /* Small phones (≤480px) */
+    @media (max-width: 480px) {
+
+      /* Stats: single column */
+      .stats-summary {
+        grid-template-columns: 1fr;
+      }
+
+      /* Grid 2 collapses to 1 */
+      .grid-2 {
+        grid-template-columns: 1fr !important;
+      }
+
+      /* Even tighter card padding */
+      .glass-card {
+        padding: 12px;
+        border-radius: 10px;
+      }
+
+      /* Reduce button padding */
+      .btn {
+        padding: 8px 14px;
+        font-size: 0.82rem;
+      }
+
+      /* Sidebar brand smaller */
+      .sidebar-brand {
+        font-size: 1.1rem;
+        padding: 18px 16px;
+      }
+
+      /* Admin section headings */
+      h2 { font-size: 1.1rem; }
+      h3 { font-size: 0.95rem; }
+
+      /* Modal header text smaller */
+      .modal-header h3 { font-size: 0.95rem; }
+
+      /* Tables: smaller text */
+      .data-table th,
+      .data-table td {
+        padding: 8px 10px;
+        font-size: 0.78rem;
+      }
+
+      /* Chart bars: very compact */
+      .chart-box { gap: 4px; }
+      .chart-bar-fill { max-width: 22px; }
+
+      /* Login box */
+      .login-box {
+        width: 98%;
+        padding: 20px 14px;
+      }
+
+      /* Donut chart smaller */
+      .donut-chart {
+        width: 140px;
+        height: 140px;
+      }
+      .donut-chart::before {
+        width: 84px;
+        height: 84px;
       }
     }
   </style>
@@ -719,6 +882,9 @@
         <i data-lucide="menu" id="hamburger-icon"></i>
       </button>
     </header>
+
+    <!-- Sidebar Backdrop (mobile only) -->
+    <div class="sidebar-backdrop" id="sidebar-backdrop" onclick="closeSidebar()"></div>
 
     <!-- Admin Navigation Sidebar -->
     <aside class="admin-sidebar" id="admin-sidebar">
@@ -1695,14 +1861,27 @@
     // ═══════════════════════════════
     function toggleSidebarMenu() {
       const sidebar = document.getElementById("admin-sidebar");
+      const backdrop = document.getElementById("sidebar-backdrop");
       const icon = document.getElementById("hamburger-icon");
       if (sidebar.classList.contains("active")) {
         sidebar.classList.remove("active");
+        backdrop && backdrop.classList.remove("active");
         icon.setAttribute("data-lucide", "menu");
       } else {
         sidebar.classList.add("active");
+        backdrop && backdrop.classList.add("active");
         icon.setAttribute("data-lucide", "x");
       }
+      lucide.createIcons();
+    }
+
+    function closeSidebar() {
+      const sidebar = document.getElementById("admin-sidebar");
+      const backdrop = document.getElementById("sidebar-backdrop");
+      const icon = document.getElementById("hamburger-icon");
+      sidebar.classList.remove("active");
+      backdrop && backdrop.classList.remove("active");
+      icon && icon.setAttribute("data-lucide", "menu");
       lucide.createIcons();
     }
 
