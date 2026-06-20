@@ -2467,8 +2467,16 @@
     }
 
     function triggerAddProductModal() {
+      tempBase64ProductPhoto = "";
       const body = `
         <form onsubmit="executeAddProduct(event)" style="display:flex; flex-direction:column; gap:12px;">
+          <div class="form-group" style="text-align:center;">
+            <div id="modal-product-photo-preview" style="width:100px; height:100px; border-radius:8px; border:2px dashed var(--border); margin:0 auto 10px auto; background-image:url('https://images.unsplash.com/photo-1517838277536-f5f99be501cd?w=400'); background-size:cover;"></div>
+            <label class="btn btn-ghost" style="font-size:0.8rem; padding:4px 10px;">
+              إضافة صورة للمنتج (اختياري)
+              <input type="file" accept="image/*" style="display:none;" onchange="encodeProductPhotoToBase64(this)">
+            </label>
+          </div>
           <div class="form-group">
             <label class="form-label">الاسم بالعربية</label>
             <input type="text" class="form-input" id="add-prod-ar" required placeholder="مثال: واي بروتين 2 كجم">
@@ -2494,6 +2502,10 @@
             <label class="form-label">الكمية بالمخزن</label>
             <input type="number" class="form-input" id="add-prod-qty" required value="10">
           </div>
+          <div class="form-group">
+            <label class="form-label">العروض أو الخصومات (اختياري، مثل: خصم 15% / عرض خاص)</label>
+            <input type="text" class="form-input" id="add-prod-promo" placeholder="مثال: خصم 10% أو BUY 1 GET 1">
+          </div>
           <button type="submit" class="btn btn-primary" style="width:100%; margin-top:10px;">إضافة وحفظ بالمخزن</button>
         </form>
       `;
@@ -2507,10 +2519,13 @@
       const category = document.getElementById("add-prod-cat").value;
       const price = parseInt(document.getElementById("add-prod-price").value);
       const qty = parseInt(document.getElementById("add-prod-qty").value);
+      const promo = document.getElementById("add-prod-promo").value.trim();
 
       state.products.push({
         id: "p_" + Date.now(),
-        name_ar, name_en, category, price, qty
+        name_ar, name_en, category, price, qty,
+        photo: tempBase64ProductPhoto,
+        promo
       });
 
       saveState();
@@ -2524,8 +2539,17 @@
       const p = state.products.find(x => x.id === id);
       if (!p) return;
 
+      tempBase64ProductPhoto = p.photo || "";
+
       const body = `
         <form onsubmit="executeEditProduct(event, '${p.id}')" style="display:flex; flex-direction:column; gap:12px;">
+          <div class="form-group" style="text-align:center;">
+            <div id="modal-product-photo-preview" style="width:100px; height:100px; border-radius:8px; border:1px dashed var(--border); margin:0 auto 10px auto; background-image:url('${tempBase64ProductPhoto || 'https://images.unsplash.com/photo-1517838277536-f5f99be501cd?w=400'}'); background-size:cover;"></div>
+            <label class="btn btn-ghost" style="font-size:0.8rem; padding:4px 10px;">
+              تغيير صورة المنتج
+              <input type="file" accept="image/*" style="display:none;" onchange="encodeProductPhotoToBase64(this)">
+            </label>
+          </div>
           <div class="form-group">
             <label class="form-label">الاسم بالعربية</label>
             <input type="text" class="form-input" id="edit-prod-ar" value="${p.name_ar}" required>
@@ -2551,6 +2575,10 @@
             <label class="form-label">الكمية بالمخزن</label>
             <input type="number" class="form-input" id="edit-prod-qty" value="${p.qty}" required>
           </div>
+          <div class="form-group">
+            <label class="form-label">العروض أو الخصومات (مثل: خصم 15% / عرض خاص)</label>
+            <input type="text" class="form-input" id="edit-prod-promo" value="${p.promo || ''}" placeholder="لا يوجد">
+          </div>
           <button type="submit" class="btn btn-primary" style="width:100%; margin-top:10px;">حفظ التعديلات</button>
         </form>
       `;
@@ -2567,6 +2595,10 @@
       p.category = document.getElementById("edit-prod-cat").value;
       p.price = parseInt(document.getElementById("edit-prod-price").value);
       p.qty = parseInt(document.getElementById("edit-prod-qty").value);
+      p.promo = document.getElementById("edit-prod-promo").value.trim();
+      if (tempBase64ProductPhoto) {
+        p.photo = tempBase64ProductPhoto;
+      }
 
       saveState();
       hideModal();

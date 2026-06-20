@@ -2346,13 +2346,27 @@
         const available = p.qty > 0;
         const badge = available ? `<span class="badge badge-success">متوفر</span>` : `<span class="badge badge-danger">نفذ المخزون</span>`;
         
+        // Discount/Promo Badge
+        const promoBadge = p.promo ? `<span class="badge badge-warning" style="position: absolute; top: 10px; left: 10px; font-weight: 800; z-index: 2;">${p.promo}</span>` : "";
+        
+        // Product Photo
+        const photoUrl = p.photo || "https://images.unsplash.com/photo-1517838277536-f5f99be501cd?w=400";
+        const photoContainer = `
+          <div style="width: 100%; height: 140px; border-radius: 8px; overflow: hidden; position: relative; margin-bottom: 12px; background: #222;">
+            ${promoBadge}
+            <img src="${photoUrl}" alt="${title}" style="width: 100%; height: 100%; object-fit: cover;">
+          </div>
+        `;
+
         const card = document.createElement("div");
         card.className = "glass-card product-card";
         card.style.display = "flex";
         card.style.flexDirection = "column";
-        card.style.justify = "space-between";
+        card.style.justifyContent = "space-between";
+        card.style.position = "relative";
         card.innerHTML = `
           <div>
+            ${photoContainer}
             <div style="display:flex; justify-content:space-between; font-size:0.75rem; color:var(--text-muted); margin-bottom:8px;">
               <span>Category: ${p.category}</span>
               ${badge}
@@ -2360,24 +2374,10 @@
             <h4 style="font-weight:700; font-size:0.95rem; margin-bottom:6px;">${title}</h4>
             <div class="font-data" style="font-weight:700; color:var(--primary); font-size:1.15rem; margin-bottom:12px;">${p.price.toLocaleString()} د.ع</div>
           </div>
-          <button class="btn btn-primary" style="width:100%; padding:8px; font-size:0.8rem;" onclick="simulateShopPurchase('${p.id}')" ${!available ? 'disabled' : ''}>
-            <i data-lucide="shopping-cart"></i> ${translations[state.lang].btn_order}
-          </button>
         `;
         grid.appendChild(card);
       });
       lucide.createIcons();
-    }
-
-    function simulateShopPurchase(prodId) {
-      const p = state.products.find(x => x.id === prodId);
-      if (!p || p.qty <= 0) return;
-
-      p.qty--;
-      saveState();
-      
-      renderMemberShopPanel();
-      showToast(translations[state.lang].t_success_order, "success");
     }
 
     // ═══════════════════════════════
