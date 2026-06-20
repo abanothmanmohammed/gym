@@ -3347,6 +3347,32 @@
     // ═══════════════════════════════
     // ⚙️ ADMIN VIEW G: SETTINGS
     // ═══════════════════════════════
+    function executeSaveSettings(e) {
+      e.preventDefault(); // ← منع تحديث الصفحة وتسجيل الخروج
+
+      const newName  = document.getElementById("owner-name-input").value.trim();
+      const newPhone = document.getElementById("gym-phone-input").value.trim();
+
+      if (!newName || !newPhone) {
+        showToast(
+          state.lang === 'ar' ? "يرجى ملء جميع الحقول المطلوبة" : "Please fill in all required fields",
+          "danger"
+        );
+        return;
+      }
+
+      // حفظ البيانات في الـ state
+      state.ownerProfile.name  = newName;
+      state.ownerProfile.phone = newPhone;
+
+      saveState(); // حفظ في localStorage
+
+      showToast(
+        state.lang === 'ar' ? "✅ تم حفظ الإعدادات بنجاح" : "✅ Settings saved successfully",
+        "success"
+      );
+    }
+
     function renderSettingsView() {
       document.getElementById("owner-name-input").value = state.ownerProfile.name;
       document.getElementById("gym-phone-input").value = state.ownerProfile.phone;
